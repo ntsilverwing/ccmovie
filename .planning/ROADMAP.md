@@ -32,9 +32,10 @@
   2. System correctly parses Chinese SRT files encoded in GBK, Big5, Shift-JIS, and UTF-8 — characters display without garbled mojibake
   3. Parsed cues render as a readable list for user verification before playback
   4. Malformed or corrupted SRT files produce clear, actionable error messages instead of silent failure
-**Plans:**
-- Plan 1: SRT Parser with encoding detection — pure function `string → Cue[]` with BOM stripping, line ending normalization, GBK/Big5/Shift-JIS/UTF-8 auto-detection, defensive error handling (PLAY-02)
-- Plan 2: File import UI — file picker + drag-drop, integration with parser, cue list preview display (PLAY-01)
+**Plans:** 2 plans
+Plans:
+- [ ] 01-01-PLAN.md — SRT Parser with encoding detection (chardet + TextDecoder + custom parser, PLAY-02)
+- [ ] 01-02-PLAN.md — File import UI (file picker + drag-drop + cue preview, PLAY-01)
 
 ---
 
@@ -106,7 +107,7 @@ Deferred to v2 (not in current roadmap):
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. SRT Foundation | 0/2 | Not started | - |
+| 1. SRT Foundation | 0/2 | Planned | - |
 | 2. Playback & Display | 0/2 | Not started | - |
 | 3. Cinema Readiness | 0/2 | Not started | - |
 | 4. Polish & Accessibility | 0/1 | Not started | - |
