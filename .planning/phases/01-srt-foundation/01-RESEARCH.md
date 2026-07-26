@@ -595,22 +595,19 @@ interface ParseError {
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **chardet accuracy on short SRT files**
+1. **chardet accuracy on short SRT files** — RESOLVED: Sample first 8KB of file for detection (chardet's default behavior). If confidence is low, try all 4 candidate encodings and pick the one that produces valid UTF-8 text with CJK characters.
    - What we know: chardet uses occurrence analysis; accuracy improves with more data
-   - What's unclear: Detection accuracy on very short SRT files (< 20 cues / < 2KB)
-   - Recommendation: Sample first 8KB of file for detection (chardet's default behavior). If confidence is low, try all 4 candidate encodings and pick the one that produces valid UTF-8 text with CJK characters.
+   - What was unclear: Detection accuracy on very short SRT files (< 20 cues / < 2KB)
 
-2. **Should we persist parsed subtitles in Phase 1 or Phase 3?**
+2. **Should we persist parsed subtitles in Phase 1 or Phase 3?** — RESOLVED: Keep Phase 1 focused on import + parse. Show parsed cues in-memory for preview. Persistence is Phase 3's responsibility.
    - What we know: Phase 3 (FILE-01) covers IndexedDB persistence
-   - What's unclear: Whether Phase 1 should include basic localStorage persistence as a stepping stone
-   - Recommendation: Keep Phase 1 focused on import + parse. Show parsed cues in-memory for preview. Persistence is Phase 3's responsibility. This keeps phases clean.
+   - What was unclear: Whether Phase 1 should include basic localStorage persistence as a stepping stone
 
-3. **Multi-file import in Phase 1?**
+3. **Multi-file import in Phase 1?** — RESOLVED: Single file per import session. Multi-file is a v2 feature.
    - What we know: v1 is single-movie
-   - What's unclear: Whether to support importing multiple SRT files for the same movie (e.g., different language cuts)
-   - Recommendation: Single file per import session. Multi-file is a v2 feature.
+   - What was unclear: Whether to support importing multiple SRT files for the same movie
 
 ---
 
