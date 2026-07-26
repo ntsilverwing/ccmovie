@@ -14,9 +14,9 @@ See: .planning/PROJECT.md (updated 2026-07-25)
 Phase 1 of 4: SRT Foundation
 
 ## Progress
-**Plans:** 0/7
+**Plans:** 2/7 (Phase 1 planned)
 **Phases:** 0/4
-**Progress:** 0%
+**Progress:** 5%
 
 ## Blockers
 (None)
@@ -49,12 +49,13 @@ Phase 1 of 4: SRT Foundation
 
 ### Tech Stack
 - Vite 8.1.5 + vite-plugin-pwa 1.3.0
-- subtitle.js 4.2.2 (SRT parsing)
+- Custom SRT parser (~50 lines, no subtitle.js — avoids Node.js stream deps)
+- chardet 2.2.0 (encoding detection) + native TextDecoder (decoding)
 - idb 8.0.3 (IndexedDB wrapper)
 - Native Screen Wake Lock API + NoSleep.js fallback
 
 ### Open Questions
-- Encoding detection: TextDecoder heuristics vs iconv-lite (bundle size tradeoff) — resolve in Phase 1 planning
+- ~~Encoding detection: TextDecoder heuristics vs iconv-lite~~ — RESOLVED: chardet + native TextDecoder (Phase 1)
 - idb vs Dexie.js: STACK.md recommends idb, ARCHITECTURE.md recommends Dexie.js — resolve in Phase 3 planning
 - NoSleep.js silent MP4 asset: needs generation — resolve in Phase 3 planning
 
