@@ -698,22 +698,19 @@ export default defineConfig({
 
 **If this table is empty:** All claims in this research were verified or cited — no user confirmation needed.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **iOS 7-day eviction: Can we detect it proactively?**
+1. **iOS 7-day eviction: Can we detect it proactively?** — RESOLVED: Store `lastOpenedAt` timestamp, show warning after 5 days (UX mitigation).
    - What we know: iOS evicts after 7 days of non-use. No API to prevent it.
-   - What's unclear: Whether we can detect impending eviction or get a callback before data is deleted.
-   - Recommendation: Store `lastOpenedAt` timestamp in IndexedDB. On app load, check if >5 days since last use and show a "refresh your subtitles" warning. This is a UX mitigation, not a technical fix.
+   - What was unclear: Whether we can detect impending eviction proactively.
 
-2. **PWA update flow: Should we force-reload or prompt?**
+2. **PWA update flow: Should we force-reload or prompt?** — RESOLVED: Prompt on `onNeedRefresh` only when NOT in playback.
    - What we know: `autoUpdate` sets `skipWaiting` + `clientsClaim`, but the new SW only takes effect after reload.
-   - What's unclear: Whether to auto-reload or prompt the user (auto-reload could interrupt playback).
-   - Recommendation: Use `workbox-window` to prompt on `onNeedRefresh`, but only show the prompt when NOT in playback (check playback state before prompting).
+   - What was unclear: Whether to auto-reload or prompt the user.
 
-3. **How many subtitles should we store?**
+3. **How many subtitles should we store?** — RESOLVED: Allow unlimited (quota permits ~500 movies).
    - What we know: A single SRT is ~100KB parsed. iOS quota is ~50MB.
-   - What's unclear: Whether to limit stored subtitles to N movies or allow unlimited.
-   - Recommendation: Allow unlimited (quota permits ~500 movies). Add a "manage subtitles" UI for deletion in Phase 4 if needed.
+   - What was unclear: Whether to limit stored subtitles to N movies or allow unlimited.
 
 ## Environment Availability
 
