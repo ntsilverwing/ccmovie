@@ -3,18 +3,20 @@ status: partial
 phase: 03-cinema-readiness
 source: [03-01-SUMMARY.md, 03-02-SUMMARY.md]
 started: 2026-07-27T12:00:00Z
-updated: 2026-07-27T15:36:15Z
+updated: 2026-07-27T23:01:40Z
 ---
 
 ## Current Test
 
-[testing paused — 10 items outstanding]
+[testing paused — network unavailable, user unable to access localhost]
 
 ## Tests
 
 ### 1. Import persists across page reload
 expected: 导入 SRT 文件后刷新页面，该影片出现在"已保存"列表中，可以选中播放
-result: [pending]
+result: blocked
+blocked_by: server
+reason: "User cannot access application - need to start dev server first"
 
 ### 2. App loads saved subtitles on startup
 expected: 应用启动时从 IndexedDB 加载已保存字幕，无需重新导入即可看到历史记录
@@ -75,9 +77,9 @@ coverage_id: 03-02-D1
 total: 13
 passed: 3
 issues: 0
-pending: 10
+pending: 9
 skipped: 0
-blocked: 0
+blocked: 1
 
 ## Gaps
 
