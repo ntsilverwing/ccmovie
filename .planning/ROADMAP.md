@@ -103,9 +103,11 @@ Plans:
   3. User can toggle high-contrast mode (yellow text #FFD700 on black) for better readability
   4. High contrast mode and offset setting persist across sessions
 
-**Plans:**
+**Plans:** 1/1 plans executed
 
-- Plan 1: Timing offset + high contrast — offset adjustment UI with real-time preview, yellow high contrast toggle, settings persistence (PLAY-06, PLAY-07)
+Plans:
+
+- [x] 04-01-PLAN.md — Timing offset + high contrast: offset adjustment UI with real-time preview, yellow high contrast toggle, settings persistence (PLAY-06, PLAY-07)
 
 **UI hint**: yes
 
@@ -133,7 +135,7 @@ Deferred to v2 (not in current roadmap):
 | 1. SRT Foundation | 2/2 | In Progress|  |
 | 2. Playback & Display | 2/2 | In Progress|  |
 | 3. Cinema Readiness | 0/2 | In Progress | - |
-| 4. Polish & Accessibility | 0/1 | Not started | - |
+| 4. Polish & Accessibility | 1/1 | Complete | 2026-07-27 |
 
 ---
 
