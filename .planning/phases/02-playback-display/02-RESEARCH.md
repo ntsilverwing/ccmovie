@@ -743,22 +743,19 @@ export function usePersistedSettings() {
 | A4 | rAF callback timestamp should not be used for timing | Pitfall 1 | If rAF timestamp is used, subtitles may drift by a few ms per frame — cumulative over 2 hours |
 | A5 | `visibilitychange` handling is automatic with absolute elapsed time | Pitfall 6 | If not, subtitles would be wrong after app switch — but absolute elapsed time handles this |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **PlaybackControls visibility during playback**
+1. **PlaybackControls visibility during playback** — RESOLVED: Always-visible controls for v1 (simpler, no auto-hide).
    - What we know: Controls should be accessible but not distracting in a dark theater.
-   - What's unclear: Should controls auto-hide after a few seconds of playback, or remain visible?
-   - Recommendation: Start with always-visible controls (simpler). Add auto-hide in Phase 4 if user testing shows it's needed.
+   - What was unclear: Should controls auto-hide after a few seconds of playback, or remain visible?
 
-2. **Font size slider interaction during playback**
+2. **Font size slider interaction during playback** — RESOLVED: Include slider in playback controls overlay with CSS custom properties for instant updates.
    - What we know: Slider should update font size in real-time.
-   - What's unclear: Should the slider be visible during playback, or only in a settings panel?
-   - Recommendation: Include a small, unobtrusive slider in the playback controls overlay. Use CSS custom properties for instant updates.
+   - What was unclear: Should the slider be visible during playback, or only in a settings panel?
 
-3. **End-of-movie behavior**
+3. **End-of-movie behavior** — RESOLVED: Auto-stop when elapsed time exceeds the last cue's end time.
    - What we know: After the last cue, the display should go blank.
-   - What's unclear: Should playback auto-stop at the end, or continue running?
-   - Recommendation: Auto-stop when elapsed time exceeds the last cue's end time. Dispatch STOP action.
+   - What was unclear: Should playback auto-stop at the end, or continue running?
 
 ## Environment Availability
 
