@@ -5,6 +5,7 @@ import { SubtitleDisplay } from './components/SubtitleDisplay'
 import { PlaybackControls } from './components/PlaybackControls'
 import { usePlaybackEngine } from './hooks/usePlaybackEngine'
 import { usePersistedSettings } from './hooks/usePersistedSettings'
+import { useWakeLock } from './hooks/useWakeLock'
 import type { ParsedSubtitle } from './types/subtitle'
 import type { ImportError } from './utils/errors'
 import type { StoredSubtitle } from './db/database'
@@ -17,6 +18,7 @@ function App() {
 
   const { state: playbackState, play, pause, stop } = usePlaybackEngine(subtitle?.cues ?? [])
   const { settings, updateSettings } = usePersistedSettings()
+  const { enable: enableWakeLock, disable: disableWakeLock } = useWakeLock()
 
   // Hydrate saved subtitles from IndexedDB on mount
   useEffect(() => {
@@ -74,6 +76,23 @@ function App() {
     handleImport(result)
   }, [handleImport])
 
+  // Wake Lock wrappers — must be called inside user gesture chain (click handler)
+  // enableWakeLock() is called without await to preserve the user gesture context
+  const handlePlay = useCallback(() => {
+    enableWakeLock() // synchronous call within gesture chain — satisfies iOS requirement
+    play()
+  }, [enableWakeLock, play])
+
+  const handlePause = useCallback(() => {
+    disableWakeLock() // screen can sleep when paused
+    pause()
+  }, [disableWakeLock, pause])
+
+  const handleStop = useCallback(() => {
+    disableWakeLock()
+    stop()
+  }, [disableWakeLock, stop])
+
   // Playback view: status is 'playing' or 'paused'
   if (playbackState.status === 'playing' || playbackState.status === 'paused') {
     return (
@@ -85,9 +104,9 @@ function App() {
         />
         <PlaybackControls
           status={playbackState.status}
-          onPlay={play}
-          onPause={pause}
-          onStop={stop}
+          onPlay={handlePlay}
+          onPause={handlePause}
+          onStop={handleStop}
           fontSize={settings.fontSize}
           isDimmed={settings.isDimmed}
           onFontSizeChange={(size) => updateSettings({ fontSize: size })}
@@ -142,9 +161,9 @@ function App() {
       />
       <PlaybackControls
         status={playbackState.status}
-        onPlay={play}
-        onPause={pause}
-        onStop={stop}
+        onPlay={handlePlay}
+        onPause={handlePause}
+        onStop={handleStop}
         fontSize={settings.fontSize}
         isDimmed={settings.isDimmed}
         onFontSizeChange={(size) => updateSettings({ fontSize: size })}
