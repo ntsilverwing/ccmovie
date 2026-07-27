@@ -6,6 +6,7 @@ import { PlaybackControls } from './components/PlaybackControls'
 import { usePlaybackEngine } from './hooks/usePlaybackEngine'
 import { usePersistedSettings } from './hooks/usePersistedSettings'
 import { useWakeLock } from './hooks/useWakeLock'
+import { RotateOverlay } from './pwa/RotateOverlay'
 import type { ParsedSubtitle } from './types/subtitle'
 import type { ImportError } from './utils/errors'
 import type { StoredSubtitle } from './db/database'
@@ -97,6 +98,7 @@ function App() {
   if (playbackState.status === 'playing' || playbackState.status === 'paused') {
     return (
       <div className="app">
+        <RotateOverlay />
         <SubtitleDisplay
           cue={playbackState.activeCue}
           fontSize={settings.fontSize}
@@ -120,6 +122,7 @@ function App() {
   if (!subtitle) {
     return (
       <div className="app">
+        <RotateOverlay />
         {savedSubtitles.length > 0 && (
           <div className="saved-movies">
             <h2 className="saved-movies-title">Continue with saved movie</h2>
@@ -153,6 +156,7 @@ function App() {
   // Ready view: subtitle loaded, playback idle
   return (
     <div className="app">
+      <RotateOverlay />
       <CuePreview
         subtitle={subtitle}
         error={error}
