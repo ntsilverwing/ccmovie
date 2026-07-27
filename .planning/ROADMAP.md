@@ -56,10 +56,12 @@ Plans:
   4. User can adjust font size from 36px to 72px via slider, and the setting persists across sessions
   5. User can toggle dim mode for darker gray text (#888888) appearance in ultra-dark environments
 
-**Plans:**
+**Plans:** 2 plans
 
-- Plan 1: Playback Engine — performance.now() timing, requestAnimationFrame loop, binary search cue lookup, manual start/stop (PLAY-03, PLAY-04)
-- Plan 2: Render Pipeline + Display Controls — OLED-optimized CSS, font size slider, dim mode toggle, persistent settings (PLAY-05, DISP-01, DISP-03)
+Plans:
+
+- [ ] 02-01-PLAN.md — Playback Engine: performance.now() timing, rAF loop, binary search cue lookup, useReducer state machine (PLAY-03, PLAY-04)
+- [ ] 02-02-PLAN.md — Render Pipeline + Display Controls: OLED-optimized CSS, font size slider, dim mode toggle, persistent settings (PLAY-05, DISP-01, DISP-03)
 
 **UI hint**: yes
 
@@ -127,7 +129,7 @@ Deferred to v2 (not in current roadmap):
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. SRT Foundation | 2/2 | In Progress|  |
-| 2. Playback & Display | 0/2 | Not started | - |
+| 2. Playback & Display | 0/2 | Planned | - |
 | 3. Cinema Readiness | 0/2 | Not started | - |
 | 4. Polish & Accessibility | 0/1 | Not started | - |
 
