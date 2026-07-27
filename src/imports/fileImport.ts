@@ -2,6 +2,8 @@ import { detectAndDecode } from './encoding'
 import { parseSRT } from './srtParser'
 import type { ParsedSubtitle } from '../types/subtitle'
 import { ImportError } from '../utils/errors'
+import { saveSubtitle } from '../db/subtitles'
+import type { StoredSubtitle } from '../db/database'
 
 /**
  * Orchestrate SRT file import: validate, read bytes, detect encoding, parse.
@@ -48,6 +50,20 @@ export async function importSRT(file: File): Promise<ParsedSubtitle> {
       'No subtitle cues found. The file may be corrupted or in an unsupported format.',
     )
   }
+
+  // Step 8b: Persist to IndexedDB (fire-and-forget — don't block import UI)
+  const stored: StoredSubtitle = {
+    id: `${file.name}-${file.size}`,
+    fileName: file.name,
+    cues: result.cues,
+    encoding: result.metadata.encoding,
+    cueCount: result.cues.length,
+    importedAt: Date.now(),
+    fileSize: file.size,
+  }
+  saveSubtitle(stored).catch((err) => {
+    console.warn('Failed to persist subtitle to IndexedDB:', err)
+  })
 
   // Step 9: Log warnings for partial parse errors (non-blocking)
   if (result.errors.length > 0) {

@@ -1,8 +1,11 @@
 import type { ParsedSubtitle } from '../types/subtitle'
+import type { StoredSubtitle } from '../db/database'
 
 interface CuePreviewProps {
   subtitle: ParsedSubtitle | null
   error: string | null
+  savedSubtitles?: StoredSubtitle[]
+  onSelectSaved?: (stored: StoredSubtitle) => void
 }
 
 /**
@@ -20,7 +23,7 @@ function formatTimecode(ms: number): string {
  * Display parsed subtitle cues as a readable list with metadata and error/warning banners.
  * All text rendered via React text nodes — never dangerouslySetInnerHTML.
  */
-export const CuePreview: React.FC<CuePreviewProps> = ({ subtitle, error }) => {
+export const CuePreview: React.FC<CuePreviewProps> = ({ subtitle, error, savedSubtitles, onSelectSaved }) => {
   // Error banner
   if (error) {
     return (
@@ -70,6 +73,26 @@ export const CuePreview: React.FC<CuePreviewProps> = ({ subtitle, error }) => {
           </div>
         ))}
       </div>
+
+      {/* Saved movies section */}
+      {savedSubtitles && savedSubtitles.length > 0 && onSelectSaved && (
+        <div className="saved-movies">
+          <h2 className="saved-movies-title">Saved Movies</h2>
+          {savedSubtitles.map((stored) => (
+            <div key={stored.id} className="saved-movie-item">
+              <button
+                className="saved-movie-button"
+                onClick={() => onSelectSaved(stored)}
+              >
+                <span className="saved-movie-name">{stored.fileName}</span>
+                <span className="saved-movie-meta">
+                  {stored.cueCount} cues · {new Date(stored.importedAt).toLocaleDateString()}
+                </span>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
