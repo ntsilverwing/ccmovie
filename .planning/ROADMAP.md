@@ -56,12 +56,12 @@ Plans:
   4. User can adjust font size from 36px to 72px via slider, and the setting persists across sessions
   5. User can toggle dim mode for darker gray text (#888888) appearance in ultra-dark environments
 
-**Plans:** 2 plans
+**Plans:** 2/2 plans executed
 
 Plans:
 
-- [ ] 02-01-PLAN.md — Playback Engine: performance.now() timing, rAF loop, binary search cue lookup, useReducer state machine (PLAY-03, PLAY-04)
-- [ ] 02-02-PLAN.md — Render Pipeline + Display Controls: OLED-optimized CSS, font size slider, dim mode toggle, persistent settings (PLAY-05, DISP-01, DISP-03)
+- [x] 02-01-PLAN.md — Playback Engine: performance.now() timing, rAF loop, binary search cue lookup, useReducer state machine (PLAY-03, PLAY-04)
+- [x] 02-02-PLAN.md — Render Pipeline + Display Controls: OLED-optimized CSS, font size slider, dim mode toggle, persistent settings (PLAY-05, DISP-01, DISP-03)
 
 **UI hint**: yes
 
@@ -80,10 +80,12 @@ Plans:
   4. User can add the app to home screen (PWA manifest with standalone display, landscape orientation)
   5. App displays correctly in landscape on Android (manifest lock) and shows rotate-to-landscape overlay on iOS
 
-**Plans:**
+**Plans:** 2 plans
 
-- Plan 1: Persistence Layer — IndexedDB storage via idb, parsed cues + metadata persistence, app load hydration (FILE-01, FILE-02)
-- Plan 2: Wake Lock + PWA — dual-strategy Wake Lock (native + NoSleep.js), vite-plugin-pwa config, manifest, landscape handling with iOS rotate overlay (DISP-02, PWA-01, PWA-02, PWA-03)
+Plans:
+
+- [ ] 03-01-PLAN.md — Persistence Layer: idb database schema, subtitle CRUD, import flow integration, app load hydration (FILE-01)
+- [ ] 03-02-PLAN.md — Wake Lock + PWA: dual-strategy Wake Lock, vite-plugin-pwa config, manifest, offline support, iOS rotate overlay (FILE-02, DISP-02, PWA-01, PWA-02, PWA-03)
 
 **UI hint**: yes
 
@@ -129,8 +131,8 @@ Deferred to v2 (not in current roadmap):
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. SRT Foundation | 2/2 | In Progress|  |
-| 2. Playback & Display | 0/2 | Planned | - |
-| 3. Cinema Readiness | 0/2 | Not started | - |
+| 2. Playback & Display | 2/2 | In Progress|  |
+| 3. Cinema Readiness | 0/2 | In Progress | - |
 | 4. Polish & Accessibility | 0/1 | Not started | - |
 
 ---
