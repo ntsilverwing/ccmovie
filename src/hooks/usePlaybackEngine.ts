@@ -84,6 +84,7 @@ export function usePlaybackEngine(cues: Cue[]): {
   // Keep cues ref in sync with cues prop
   useEffect(() => {
     cuesRef.current = cues
+    engineRef.current?.setCues(cues)
   }, [cues])
 
   // Create engine instance once
