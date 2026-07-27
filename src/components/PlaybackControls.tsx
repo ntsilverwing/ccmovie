@@ -1,0 +1,61 @@
+import type { PlaybackStatus } from '../hooks/usePlaybackEngine'
+
+interface PlaybackControlsProps {
+  status: PlaybackStatus
+  onPlay: () => void
+  onPause: () => void
+  onStop: () => void
+  fontSize: number
+  isDimmed: boolean
+  onFontSizeChange: (size: number) => void
+  onDimToggle: () => void
+}
+
+/**
+ * Playback controls overlay — Start/Stop/Pause + font slider + dim toggle.
+ *
+ * Positioned fixed at bottom center. All buttons have large touch targets
+ * for dark theater use (min 48x48px).
+ */
+export function PlaybackControls({
+  status,
+  onPlay,
+  onPause,
+  onStop,
+  fontSize,
+  isDimmed,
+  onFontSizeChange,
+  onDimToggle,
+}: PlaybackControlsProps) {
+  return (
+    <div className="playback-controls">
+      {status === 'idle' && (
+        <button className="start-button" onClick={onPlay}>
+          Start
+        </button>
+      )}
+
+      {(status === 'playing' || status === 'paused') && (
+        <>
+          <button className="control-button" onClick={onStop}>
+            Stop
+          </button>
+          <button className="control-button" onClick={status === 'paused' ? onPlay : onPause}>
+            {status === 'paused' ? 'Resume' : 'Pause'}
+          </button>
+          <input
+            type="range"
+            min="36"
+            max="72"
+            value={fontSize}
+            onChange={(e) => onFontSizeChange(Number(e.target.value))}
+            className="font-size-slider"
+          />
+          <button className="control-button" onClick={onDimToggle}>
+            {isDimmed ? 'Bright' : 'Dim'}
+          </button>
+        </>
+      )}
+    </div>
+  )
+}
