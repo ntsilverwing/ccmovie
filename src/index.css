@@ -240,6 +240,17 @@ body.high-contrast {
   accent-color: #888;
 }
 
+/* Offset display — shows current timing offset value */
+.offset-display {
+  min-width: 64px;
+  text-align: center;
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: #e0e0e0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 /* Ready view controls — centered start button */
 .ready-controls {
   display: flex;

@@ -9,6 +9,10 @@ interface PlaybackControlsProps {
   isDimmed: boolean
   onFontSizeChange: (size: number) => void
   onDimToggle: () => void
+  offsetMs: number
+  isHighContrast: boolean
+  onOffsetChange: (offsetMs: number) => void
+  onHighContrastToggle: () => void
 }
 
 /**
@@ -26,6 +30,10 @@ export function PlaybackControls({
   isDimmed,
   onFontSizeChange,
   onDimToggle,
+  offsetMs,
+  isHighContrast,
+  onOffsetChange,
+  onHighContrastToggle,
 }: PlaybackControlsProps) {
   return (
     <div className="playback-controls">
@@ -37,6 +45,18 @@ export function PlaybackControls({
 
       {(status === 'playing' || status === 'paused') && (
         <>
+          <button className="control-button" onClick={() => onOffsetChange(offsetMs - 500)}>
+            −0.5s
+          </button>
+          <span className="offset-display">
+            {offsetMs > 0 ? '+' : ''}{(offsetMs / 1000).toFixed(1)}s
+          </span>
+          <button className="control-button" onClick={() => onOffsetChange(offsetMs + 500)}>
+            +0.5s
+          </button>
+          <button className="control-button" onClick={() => onOffsetChange(0)}>
+            Reset
+          </button>
           <button className="control-button" onClick={onStop}>
             Stop
           </button>
@@ -53,6 +73,9 @@ export function PlaybackControls({
           />
           <button className="control-button" onClick={onDimToggle}>
             {isDimmed ? 'Bright' : 'Dim'}
+          </button>
+          <button className="control-button" onClick={onHighContrastToggle}>
+            {isHighContrast ? 'Normal' : 'Contrast'}
           </button>
         </>
       )}

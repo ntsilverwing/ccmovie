@@ -17,8 +17,8 @@ function App() {
   const [error, setError] = useState<string | null>(null)
   const [savedSubtitles, setSavedSubtitles] = useState<StoredSubtitle[]>([])
 
-  const { state: playbackState, play, pause, stop } = usePlaybackEngine(subtitle?.cues ?? [])
   const { settings, updateSettings } = usePersistedSettings()
+  const { state: playbackState, play, pause, stop } = usePlaybackEngine(subtitle?.cues ?? [], settings.offsetMs)
   const { enable: enableWakeLock, disable: disableWakeLock } = useWakeLock()
 
   // Hydrate saved subtitles from IndexedDB on mount
@@ -103,6 +103,7 @@ function App() {
           cue={playbackState.activeCue}
           fontSize={settings.fontSize}
           isDimmed={settings.isDimmed}
+          isHighContrast={settings.isHighContrast}
         />
         <PlaybackControls
           status={playbackState.status}
@@ -112,7 +113,11 @@ function App() {
           fontSize={settings.fontSize}
           isDimmed={settings.isDimmed}
           onFontSizeChange={(size) => updateSettings({ fontSize: size })}
-          onDimToggle={() => updateSettings({ isDimmed: !settings.isDimmed })}
+          onDimToggle={() => updateSettings({ isDimmed: !settings.isDimmed, isHighContrast: false })}
+          offsetMs={settings.offsetMs}
+          isHighContrast={settings.isHighContrast}
+          onOffsetChange={(offsetMs) => updateSettings({ offsetMs })}
+          onHighContrastToggle={() => updateSettings({ isHighContrast: !settings.isHighContrast, isDimmed: false })}
         />
       </div>
     )
@@ -171,7 +176,11 @@ function App() {
         fontSize={settings.fontSize}
         isDimmed={settings.isDimmed}
         onFontSizeChange={(size) => updateSettings({ fontSize: size })}
-        onDimToggle={() => updateSettings({ isDimmed: !settings.isDimmed })}
+        onDimToggle={() => updateSettings({ isDimmed: !settings.isDimmed, isHighContrast: false })}
+        offsetMs={settings.offsetMs}
+        isHighContrast={settings.isHighContrast}
+        onOffsetChange={(offsetMs) => updateSettings({ offsetMs })}
+        onHighContrastToggle={() => updateSettings({ isHighContrast: !settings.isHighContrast, isDimmed: false })}
       />
     </div>
   )

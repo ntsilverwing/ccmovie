@@ -5,6 +5,7 @@ interface SubtitleDisplayProps {
   cue: Cue | null
   fontSize: number
   isDimmed: boolean
+  isHighContrast: boolean
 }
 
 /**
@@ -14,7 +15,7 @@ interface SubtitleDisplayProps {
  * Font size and dim mode are driven by CSS custom properties for instant
  * visual updates without React re-renders.
  */
-export function SubtitleDisplay({ cue, fontSize, isDimmed }: SubtitleDisplayProps) {
+export function SubtitleDisplay({ cue, fontSize, isDimmed, isHighContrast }: SubtitleDisplayProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Update font size via CSS custom property (no re-render needed for visual change)
@@ -27,6 +28,12 @@ export function SubtitleDisplay({ cue, fontSize, isDimmed }: SubtitleDisplayProp
     document.body.classList.toggle('dimmed', isDimmed)
     return () => document.body.classList.remove('dimmed')
   }, [isDimmed])
+
+  // Toggle high-contrast mode via body class
+  useEffect(() => {
+    document.body.classList.toggle('high-contrast', isHighContrast)
+    return () => document.body.classList.remove('high-contrast')
+  }, [isHighContrast])
 
   return (
     <div ref={containerRef} className="subtitle-container">
