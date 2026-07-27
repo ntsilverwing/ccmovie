@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "chardet": "^2.2.0",
+    "idb": "^8.0.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
