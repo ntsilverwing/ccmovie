@@ -2,12 +2,55 @@
   box-sizing: border-box;
 }
 
+:root {
+  /* Cinema display tokens — OLED-optimized */
+  --subtitle-bg: #000000;
+  --subtitle-color: #e0e0e0;
+  --subtitle-font-size: 48px;
+  --subtitle-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+  --subtitle-font-weight: 500;
+  --subtitle-max-width: 80vw;
+  --subtitle-line-height: 1.4;
+}
+
 body {
   margin: 0;
   background: #000000;
   color: #e0e0e0;
   font-family: system-ui, -apple-system, sans-serif;
   min-height: 100vh;
+}
+
+/* Dim mode — gray text for ultra-dark environments (DISP-03) */
+body.dimmed {
+  --subtitle-color: #888888;
+}
+
+/* Subtitle display container — fills viewport, centers text */
+.subtitle-container {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--subtitle-bg);
+  padding: 5vw;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Subtitle text — cinema-optimized with CSS custom properties */
+.subtitle-text {
+  color: var(--subtitle-color);
+  font-size: var(--subtitle-font-size);
+  font-weight: var(--subtitle-font-weight);
+  text-shadow: var(--subtitle-shadow);
+  max-width: var(--subtitle-max-width);
+  line-height: var(--subtitle-line-height);
+  text-align: center;
+  white-space: pre-wrap;
+  margin: 0;
+  font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 .app {
