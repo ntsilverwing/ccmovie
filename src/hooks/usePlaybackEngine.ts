@@ -69,7 +69,7 @@ export function playbackReducer(state: PlaybackState, action: PlaybackAction): P
  *
  * Returns { state, play, pause, stop }.
  */
-export function usePlaybackEngine(cues: Cue[]): {
+export function usePlaybackEngine(cues: Cue[], offsetMs: number = 0): {
   state: PlaybackState
   play: () => void
   pause: () => void
@@ -86,6 +86,11 @@ export function usePlaybackEngine(cues: Cue[]): {
     cuesRef.current = cues
     engineRef.current?.setCues(cues)
   }, [cues])
+
+  // Wire offset from settings to engine (real-time updates without restart)
+  useEffect(() => {
+    engineRef.current?.setOffset(offsetMs)
+  }, [offsetMs])
 
   // Create engine instance once
   useEffect(() => {

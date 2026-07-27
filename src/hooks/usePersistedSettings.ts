@@ -8,6 +8,10 @@ export interface Settings {
   fontSize: number
   /** Dim mode — gray text for ultra-dark environments */
   isDimmed: boolean
+  /** Timing offset in milliseconds, range -5000 to 5000 */
+  offsetMs: number
+  /** High contrast mode — yellow text on black */
+  isHighContrast: boolean
 }
 
 /** localStorage key for settings */
@@ -17,6 +21,8 @@ const SETTINGS_KEY = 'cinemasyncsubs-settings'
 const DEFAULT_SETTINGS: Settings = {
   fontSize: 48,
   isDimmed: false,
+  offsetMs: 0,
+  isHighContrast: false,
 }
 
 /**
@@ -37,7 +43,13 @@ function loadSettings(): Settings {
     const isDimmed = typeof parsed.isDimmed === 'boolean'
       ? parsed.isDimmed
       : DEFAULT_SETTINGS.isDimmed
-    return { fontSize, isDimmed }
+    const offsetMs = typeof parsed.offsetMs === 'number'
+      ? Math.max(-5000, Math.min(5000, parsed.offsetMs))
+      : DEFAULT_SETTINGS.offsetMs
+    const isHighContrast = typeof parsed.isHighContrast === 'boolean'
+      ? parsed.isHighContrast
+      : DEFAULT_SETTINGS.isHighContrast
+    return { fontSize, isDimmed, offsetMs, isHighContrast }
   } catch {
     return DEFAULT_SETTINGS
   }

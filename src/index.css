@@ -26,6 +26,11 @@ body.dimmed {
   --subtitle-color: #888888;
 }
 
+/* High contrast mode — yellow text on black for accessibility (WCAG AAA) */
+body.high-contrast {
+  --subtitle-color: #FFD700;
+}
+
 /* Subtitle display container — fills viewport, centers text */
 .subtitle-container {
   position: fixed;

@@ -61,6 +61,7 @@ export class PlaybackEngine {
   private isPlaying: boolean = false
   private rafId: number | null = null
   private lastIndex: number = -1
+  private offsetMs: number = 0
   private cues: Cue[]
 
   private onCueChange: (index: number) => void
@@ -68,6 +69,15 @@ export class PlaybackEngine {
   constructor(cues: Cue[], onCueChange: (index: number) => void) {
     this.cues = cues
     this.onCueChange = onCueChange
+  }
+
+  /**
+   * Set timing offset in milliseconds.
+   * Positive = subtitles appear later (fix early subtitles).
+   * Negative = subtitles appear earlier (fix late subtitles).
+   */
+  setOffset(offsetMs: number): void {
+    this.offsetMs = offsetMs
   }
 
   /**
@@ -119,7 +129,7 @@ export class PlaybackEngine {
    * only when the active cue changes. Auto-stop when all cues passed.
    */
   private tick = (): void => {
-    const elapsed = performance.now() - this.startTime
+    const elapsed = performance.now() - this.startTime + this.offsetMs
     const activeIndex = findActiveCue(this.cues, elapsed, this.lastIndex)
 
     if (activeIndex !== this.lastIndex) {
