@@ -1,24 +1,43 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: Cinema Subtitle PWA
+status: completed
+last_updated: "2026-07-27T03:02:41.466Z"
+progress:
+  total_phases: 4
+  completed_phases: 1
+  total_plans: 2
+  completed_plans: 2
+  percent: 25
+---
+
 # State: CinemaSyncSubs
 
 ## Project Reference
+
 See: .planning/PROJECT.md (updated 2026-07-25)
 **Core value:** 让非英语母语观众在影院看外语片时能跟上剧情
-**Current focus:** Phase 1 — SRT Foundation
+**Current focus:** Phase 1 — srt-foundation
 
 ## Milestone
+
 **Version:** v1.0
-**Status:** In Progress
+**Status:** Phase 1 complete
 **Started:** 2026-07-26
 
 ## Current Phase
+
 Phase 1 of 4: SRT Foundation
 
 ## Progress
+
 **Plans:** 2/7 (Phase 1 planned)
 **Phases:** 0/4
 **Progress:** 5%
 
 ## Blockers
+
 (None)
 
 ## Key Risks
@@ -42,12 +61,14 @@ Phase 1 of 4: SRT Foundation
 ## Accumulated Context
 
 ### Architecture
+
 - 3-layer pipeline: Parser → Playback Engine → Render Pipeline
 - State Store as single source of truth
 - Dual persistence: IndexedDB (subtitle data) + Cache API (app shell)
 - Time-separation: performance.now() for timing, rAF for rendering only
 
 ### Tech Stack
+
 - Vite 8.1.5 + vite-plugin-pwa 1.3.0
 - Custom SRT parser (~50 lines, no subtitle.js — avoids Node.js stream deps)
 - chardet 2.2.0 (encoding detection) + native TextDecoder (decoding)
@@ -55,6 +76,7 @@ Phase 1 of 4: SRT Foundation
 - Native Screen Wake Lock API + NoSleep.js fallback
 
 ### Open Questions
+
 - ~~Encoding detection: TextDecoder heuristics vs iconv-lite~~ — RESOLVED: chardet + native TextDecoder (Phase 1)
 - idb vs Dexie.js: STACK.md recommends idb, ARCHITECTURE.md recommends Dexie.js — resolve in Phase 3 planning
 - NoSleep.js silent MP4 asset: needs generation — resolve in Phase 3 planning
