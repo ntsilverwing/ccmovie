@@ -324,17 +324,15 @@ const handleDimToggle = () => {
 | A4 | Mutual exclusivity between dim mode and high contrast is desired | Anti-Patterns #4 | If user wants dim+yellow (unlikely), they can't have it. Low risk — these modes serve different accessibility needs. |
 | A5 | Offset should be applied to elapsed time, not cue data | Pattern 1 | This is a well-established pattern in video player engines. Very low risk. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should offset adjustment be available in the ready view (before playback starts)?**
+1. **Should offset adjustment be available in the ready view (before playback starts)?** — RESOLVED: Show only during playback (simpler, offset needs engine running).
    - What we know: The offset needs the engine running to take effect.
-   - What's unclear: Whether users want to pre-set offset before pressing Start.
-   - Recommendation: Show offset controls in both ready view and playback view. In ready view, the value is stored and applied when playback starts. This is a UX enhancement, not a technical blocker.
+   - What was unclear: Whether users want to pre-set offset before pressing Start.
 
-2. **Should there be a fine-adjustment mode (0.1s steps)?**
+2. **Should there be a fine-adjustment mode (0.1s steps)?** — RESOLVED: Start with 0.5s steps (standard). Add fine-adjustment only if user feedback demands it.
    - What we know: 0.5s steps are standard but some users want frame-level precision.
-   - What's unclear: Whether the added UI complexity is worth it for v1.
-   - Recommendation: Start with 0.5s steps. Add fine-adjustment (hold button for 0.1s steps) only if user feedback demands it.
+   - What was unclear: Whether the added UI complexity is worth it for v1.
 
 ## Environment Availability
 
