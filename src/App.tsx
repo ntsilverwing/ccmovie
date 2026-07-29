@@ -24,6 +24,13 @@ function App() {
   const { enable: enableWakeLock, disable: disableWakeLock } = useWakeLock()
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>()
   const [controlsVisible, setControlsVisible] = useState(true)
+  const [isFullscreen, setIsFullscreen] = useState(!!document.fullscreenElement)
+
+  useEffect(() => {
+    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement)
+    document.addEventListener('fullscreenchange', onFsChange)
+    return () => document.removeEventListener('fullscreenchange', onFsChange)
+  }, [])
 
   // Hydrate saved subtitles from IndexedDB on mount
   useEffect(() => {
@@ -107,6 +114,14 @@ function App() {
     stop()
   }, [disableWakeLock, stop])
 
+  const handleToggleFullscreen = useCallback(() => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.().catch(() => {})
+    } else {
+      document.documentElement.requestFullscreen?.().catch(() => {})
+    }
+  }, [])
+
   // Auto-hide controls after 3s of inactivity during playback
   useEffect(() => {
     // Only auto-hide during active playback (not paused)
@@ -155,6 +170,8 @@ function App() {
           onOffsetChange={(offsetMs) => updateSettings({ offsetMs })}
           onHighContrastToggle={() => updateSettings({ isHighContrast: !settings.isHighContrast, isDimmed: false })}
           controlsVisible={controlsVisible}
+          isFullscreen={isFullscreen}
+          onToggleFullscreen={handleToggleFullscreen}
         />
       </div>
     )
@@ -233,6 +250,8 @@ function App() {
         onOffsetChange={(offsetMs) => updateSettings({ offsetMs })}
         onHighContrastToggle={() => updateSettings({ isHighContrast: !settings.isHighContrast, isDimmed: false })}
         controlsVisible={controlsVisible}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={handleToggleFullscreen}
       />
     </div>
   )

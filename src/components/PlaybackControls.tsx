@@ -15,6 +15,8 @@ interface PlaybackControlsProps {
   onOffsetChange: (offsetMs: number) => void
   onHighContrastToggle: () => void
   controlsVisible: boolean
+  isFullscreen: boolean
+  onToggleFullscreen: () => void
 }
 
 /**
@@ -37,6 +39,8 @@ export function PlaybackControls({
   onOffsetChange,
   onHighContrastToggle,
   controlsVisible,
+  isFullscreen,
+  onToggleFullscreen,
 }: PlaybackControlsProps) {
   const { t } = useLanguage()
 
@@ -86,6 +90,9 @@ export function PlaybackControls({
           </button>
           <button className="control-button" onClick={onHighContrastToggle}>
             {isHighContrast ? t('normal') : t('contrast')}
+          </button>
+          <button className="control-button" onClick={onToggleFullscreen}>
+            {isFullscreen ? t('exitFullscreen') : t('fullscreen')}
           </button>
         </>
       )}
