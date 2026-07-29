@@ -70,6 +70,8 @@ export function PlaybackControls({
             value={fontSize}
             onChange={(e) => onFontSizeChange(Number(e.target.value))}
             className="font-size-slider"
+            aria-label="Font size"
+            aria-valuetext={`${fontSize} pixels`}
           />
           <button className="control-button" onClick={onDimToggle}>
             {isDimmed ? 'Bright' : 'Dim'}
