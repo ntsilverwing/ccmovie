@@ -65,16 +65,19 @@ export function PlaybackControls({
           <button className="control-button" onClick={status === 'paused' ? onPlay : onPause}>
             {status === 'paused' ? 'Resume' : 'Pause'}
           </button>
-          <input
-            type="range"
-            min="36"
-            max="72"
-            value={fontSize}
-            onChange={(e) => onFontSizeChange(Number(e.target.value))}
-            className="font-size-slider"
-            aria-label="Font size"
-            aria-valuetext={`${fontSize} pixels`}
-          />
+          <div className="font-size-control">
+            <span className="font-size-label" aria-hidden="true">Aa</span>
+            <input
+              type="range"
+              min="36"
+              max="72"
+              value={fontSize}
+              onChange={(e) => onFontSizeChange(Number(e.target.value))}
+              className="font-size-slider"
+              aria-label="Font size"
+              aria-valuetext={`${fontSize} pixels`}
+            />
+          </div>
           <button className="control-button" onClick={onDimToggle}>
             {isDimmed ? 'Bright' : 'Dim'}
           </button>
