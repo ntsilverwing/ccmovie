@@ -81,12 +81,15 @@ Plans:
   4. User can add the app to home screen (PWA manifest with standalone display, landscape orientation)
   5. App displays correctly in landscape on Android (manifest lock) and shows rotate-to-landscape overlay on iOS
 
-**Plans:** 2/2 plans executed
+**Plans:** 2/2 plans executed + 3 gap closure plans
 
 Plans:
 
 - [x] 03-01-PLAN.md — Persistence Layer: idb database schema, subtitle CRUD, import flow integration, app load hydration (FILE-01)
 - [x] 03-02-PLAN.md — Wake Lock + PWA: dual-strategy Wake Lock, vite-plugin-pwa config, manifest, offline support, iOS rotate overlay (FILE-02, DISP-02, PWA-01, PWA-02, PWA-03)
+- [ ] 03-03-PLAN.md — Gap: Fullscreen API + auto-hide controls for true cinema fullscreen (G-03-1, DISP-02)
+- [ ] 03-04-PLAN.md — Gap: Playback bar responsive layout + labeled slider + smaller default font (G-03-1b, G-03-1c, DISP-02)
+- [ ] 03-05-PLAN.md — Gap: Chinese/English i18n with LanguageContext + translations dictionary (G-03-1d, DISP-02)
 
 **UI hint**: yes
 
@@ -135,7 +138,7 @@ Deferred to v2 (not in current roadmap):
 |-------|----------------|--------|-----------|
 | 1. SRT Foundation | 2/2 | In Progress|  |
 | 2. Playback & Display | 2/3 | In Progress|  |
-| 3. Cinema Readiness | 2/2 | In Progress|  |
+| 3. Cinema Readiness | 2/2 + 3 gap | In Progress|  |
 | 4. Polish & Accessibility | 1/1 | In Progress|  |
 
 ---
