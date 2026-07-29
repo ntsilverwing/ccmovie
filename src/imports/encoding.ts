@@ -38,6 +38,12 @@ export function detectAndDecode(buffer: Uint8Array): { text: string; encoding: s
   const encoding = cjkMatch?.name || detected[0]?.name || 'utf-8'
 
   // Stage 4: Decode with detected encoding (fatal: false for resilience)
-  const text = new TextDecoder(encoding, { fatal: false }).decode(buffer)
-  return { text, encoding }
+  try {
+    const text = new TextDecoder(encoding, { fatal: false }).decode(buffer)
+    return { text, encoding }
+  } catch {
+    // Unsupported encoding (e.g., exotic ISO variant) — fall back to UTF-8 with replacement
+    const text = new TextDecoder('utf-8', { fatal: false }).decode(buffer)
+    return { text, encoding: 'UTF-8 (fallback)' }
+  }
 }
