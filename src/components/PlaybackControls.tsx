@@ -48,7 +48,7 @@ export function PlaybackControls({
           <button className="control-button" onClick={() => onOffsetChange(offsetMs - 500)}>
             −0.5s
           </button>
-          <span className="offset-display">
+          <span className="offset-display" aria-live="polite" aria-atomic="true">
             {offsetMs > 0 ? '+' : ''}{(offsetMs / 1000).toFixed(1)}s
           </span>
           <button className="control-button" onClick={() => onOffsetChange(offsetMs + 500)}>
