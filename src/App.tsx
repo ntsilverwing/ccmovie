@@ -21,7 +21,7 @@ function App() {
   const { t, lang, setLang } = useLanguage()
   const { settings, updateSettings } = usePersistedSettings()
   const { state: playbackState, play, pause, stop } = usePlaybackEngine(subtitle?.cues ?? [], settings.offsetMs)
-  const { enable: enableWakeLock, disable: disableWakeLock } = useWakeLock()
+  const { enable: enableWakeLock, disable: disableWakeLock, isEnabled: wakeLockActive } = useWakeLock()
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>()
   const [controlsVisible, setControlsVisible] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(!!document.fullscreenElement)
@@ -172,6 +172,7 @@ function App() {
           controlsVisible={controlsVisible}
           isFullscreen={isFullscreen}
           onToggleFullscreen={handleToggleFullscreen}
+          wakeLockActive={wakeLockActive}
         />
       </div>
     )
@@ -252,6 +253,7 @@ function App() {
         controlsVisible={controlsVisible}
         isFullscreen={isFullscreen}
         onToggleFullscreen={handleToggleFullscreen}
+        wakeLockActive={wakeLockActive}
       />
     </div>
   )

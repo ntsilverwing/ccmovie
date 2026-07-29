@@ -17,6 +17,7 @@ interface PlaybackControlsProps {
   controlsVisible: boolean
   isFullscreen: boolean
   onToggleFullscreen: () => void
+  wakeLockActive: boolean
 }
 
 /**
@@ -41,6 +42,7 @@ export function PlaybackControls({
   controlsVisible,
   isFullscreen,
   onToggleFullscreen,
+  wakeLockActive,
 }: PlaybackControlsProps) {
   const { t } = useLanguage()
 
@@ -94,6 +96,11 @@ export function PlaybackControls({
           <button className="control-button" onClick={onToggleFullscreen}>
             {isFullscreen ? t('exitFullscreen') : t('fullscreen')}
           </button>
+          {wakeLockActive && (
+            <span className="wake-lock-indicator" aria-live="polite">
+              {t('wakeLockOn')}
+            </span>
+          )}
         </>
       )}
     </div>

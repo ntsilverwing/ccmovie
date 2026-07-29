@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect } from 'react'
+import { useRef, useCallback, useEffect, useState } from 'react'
 import NoSleep from '@zakj/no-sleep'
 
 /**
@@ -12,6 +12,7 @@ import NoSleep from '@zakj/no-sleep'
  */
 export function useWakeLock() {
   const noSleepRef = useRef<InstanceType<typeof NoSleep> | null>(null)
+  const [isEnabled, setIsEnabled] = useState(false)
 
   // Lazy init — NoSleep requires DOM, create on first use
   const getNoSleep = useCallback(() => {
@@ -26,14 +27,17 @@ export function useWakeLock() {
     try {
       // enable() returns a Promise per runtime implementation; type def says void
       await (getNoSleep().enable() as unknown as Promise<void>)
+      setIsEnabled(true)
     } catch (err) {
       // Wake Lock failed — log but don't crash playback
       console.warn('Wake Lock enable failed:', err)
+      setIsEnabled(false)
     }
   }, [getNoSleep])
 
   const disable = useCallback(() => {
     getNoSleep().disable()
+    setIsEnabled(false)
   }, [getNoSleep])
 
   // NOTE: Wake Lock re-acquisition on visibilitychange is intentionally NOT
@@ -50,5 +54,5 @@ export function useWakeLock() {
     }
   }, [])
 
-  return { enable, disable }
+  return { enable, disable, isEnabled }
 }

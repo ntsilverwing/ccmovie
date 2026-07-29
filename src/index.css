@@ -288,6 +288,18 @@ body.high-contrast {
   -webkit-user-select: none;
 }
 
+/* Wake Lock indicator — shows when screen lock is active */
+.wake-lock-indicator {
+  font-size: 0.75rem;
+  color: #4caf50;
+  background: rgba(76, 175, 80, 0.12);
+  padding: 4px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 /* Ready view controls — centered start button */
 .ready-controls {
   display: flex;

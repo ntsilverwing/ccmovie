@@ -19,6 +19,7 @@ const translations = {
     fontSizeLabel: 'Aa',
     fullscreen: 'Fullscreen',
     exitFullscreen: 'Exit Fullscreen',
+    wakeLockOn: 'Screen ON',
 
     // CuePreview.tsx
     importToGetStarted: 'Import an SRT file to get started',
@@ -62,6 +63,7 @@ const translations = {
     fontSizeLabel: '字',
     fullscreen: '全屏',
     exitFullscreen: '退出全屏',
+    wakeLockOn: '屏幕常亮',
 
     // CuePreview.tsx
     importToGetStarted: '导入 SRT 文件开始使用',
