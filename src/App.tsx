@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { FilePicker } from './components/FilePicker'
 import { CuePreview } from './components/CuePreview'
 import { SubtitleDisplay } from './components/SubtitleDisplay'
@@ -20,6 +20,8 @@ function App() {
   const { settings, updateSettings } = usePersistedSettings()
   const { state: playbackState, play, pause, stop } = usePlaybackEngine(subtitle?.cues ?? [], settings.offsetMs)
   const { enable: enableWakeLock, disable: disableWakeLock } = useWakeLock()
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout>>()
+  const [controlsVisible, setControlsVisible] = useState(true)
 
   // Hydrate saved subtitles from IndexedDB on mount
   useEffect(() => {
@@ -81,6 +83,12 @@ function App() {
   // enableWakeLock() is called without await to preserve the user gesture context
   const handlePlay = useCallback(() => {
     enableWakeLock() // synchronous call within gesture chain — satisfies iOS requirement
+    // Request fullscreen within user gesture to satisfy browser security
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.().catch(() => {
+        // Fullscreen not supported or denied — fail silently, playback continues
+      })
+    }
     play()
   }, [enableWakeLock, play])
 
@@ -91,8 +99,34 @@ function App() {
 
   const handleStop = useCallback(() => {
     disableWakeLock()
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.().catch(() => {})
+    }
     stop()
   }, [disableWakeLock, stop])
+
+  // Auto-hide controls after 3s of inactivity during playback
+  useEffect(() => {
+    // Only auto-hide during active playback (not paused)
+    if (playbackState.status !== 'playing') {
+      setControlsVisible(true)
+      return
+    }
+    setControlsVisible(true)
+    const resetTimer = () => {
+      setControlsVisible(true)
+      clearTimeout(hideTimerRef.current)
+      hideTimerRef.current = setTimeout(() => setControlsVisible(false), 3000)
+    }
+    resetTimer()
+    window.addEventListener('pointermove', resetTimer)
+    window.addEventListener('touchstart', resetTimer)
+    return () => {
+      clearTimeout(hideTimerRef.current)
+      window.removeEventListener('pointermove', resetTimer)
+      window.removeEventListener('touchstart', resetTimer)
+    }
+  }, [playbackState.status])
 
   // Playback view: status is 'playing' or 'paused'
   if (playbackState.status === 'playing' || playbackState.status === 'paused') {
@@ -118,6 +152,7 @@ function App() {
           isHighContrast={settings.isHighContrast}
           onOffsetChange={(offsetMs) => updateSettings({ offsetMs })}
           onHighContrastToggle={() => updateSettings({ isHighContrast: !settings.isHighContrast, isDimmed: false })}
+          controlsVisible={controlsVisible}
         />
       </div>
     )
@@ -181,6 +216,7 @@ function App() {
         isHighContrast={settings.isHighContrast}
         onOffsetChange={(offsetMs) => updateSettings({ offsetMs })}
         onHighContrastToggle={() => updateSettings({ isHighContrast: !settings.isHighContrast, isDimmed: false })}
+        controlsVisible={controlsVisible}
       />
     </div>
   )
