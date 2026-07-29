@@ -4,6 +4,8 @@ import type { ParsedSubtitle } from '../types/subtitle'
 import { ImportError } from '../utils/errors'
 import { saveSubtitle } from '../db/subtitles'
 import type { StoredSubtitle } from '../db/database'
+import { t } from '../i18n/translations'
+import { loadSettings } from '../hooks/usePersistedSettings'
 
 /**
  * Orchestrate SRT file import: validate, read bytes, detect encoding, parse.
@@ -16,16 +18,18 @@ import type { StoredSubtitle } from '../db/database'
  * @throws ImportError for invalid file type, oversized file, or zero cues
  */
 export async function importSRT(file: File): Promise<ParsedSubtitle> {
+  const { lang } = loadSettings()
+
   // Step 1: Validate file extension
   const ext = file.name.toLowerCase().split('.').pop()
   if (ext !== 'srt' && ext !== 'txt') {
-    throw new ImportError('INVALID_TYPE', 'Please select an SRT or TXT subtitle file.')
+    throw new ImportError('INVALID_TYPE', t(lang, 'invalidType'))
   }
 
   // Step 2: Validate file size (cap at 5MB)
   const MAX_SIZE = 5 * 1024 * 1024 // 5242880 bytes
   if (file.size > MAX_SIZE) {
-    throw new ImportError('FILE_TOO_LARGE', 'File is too large. Maximum size is 5MB.')
+    throw new ImportError('FILE_TOO_LARGE', t(lang, 'fileTooLarge'))
   }
 
   // Step 3: Read file as raw bytes
@@ -47,11 +51,11 @@ export async function importSRT(file: File): Promise<ParsedSubtitle> {
   if (result.cues.length === 0) {
     throw new ImportError(
       'NO_CUES',
-      'No subtitle cues found. The file may be corrupted or in an unsupported format.',
+      t(lang, 'noCues'),
     )
   }
 
-  // Step 8b: Persist to IndexedDB (fire-and-forget — don't block import UI)
+  // Step 8b: Persist to IndexedDB — await to surface errors to user
   const stored: StoredSubtitle = {
     id: `${file.name}-${file.size}`,
     fileName: file.name,
@@ -61,9 +65,14 @@ export async function importSRT(file: File): Promise<ParsedSubtitle> {
     importedAt: Date.now(),
     fileSize: file.size,
   }
-  saveSubtitle(stored).catch((err) => {
-    console.warn('Failed to persist subtitle to IndexedDB:', err)
-  })
+  try {
+    await saveSubtitle(stored)
+  } catch (err) {
+    throw new ImportError(
+      'PERSISTENCE_ERROR',
+      t(lang, 'persistenceError', { message: err instanceof Error ? err.message : String(err) }),
+    )
+  }
 
   // Step 9: Log warnings for partial parse errors (non-blocking)
   if (result.errors.length > 0) {

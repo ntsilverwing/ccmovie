@@ -1,4 +1,5 @@
 import type { PlaybackStatus } from '../hooks/usePlaybackEngine'
+import { useLanguage } from '../i18n/LanguageContext'
 
 interface PlaybackControlsProps {
   status: PlaybackStatus
@@ -37,11 +38,13 @@ export function PlaybackControls({
   onHighContrastToggle,
   controlsVisible,
 }: PlaybackControlsProps) {
+  const { t } = useLanguage()
+
   return (
     <div className={`playback-controls${controlsVisible ? '' : ' hidden'}`}>
       {status === 'idle' && (
         <button className="start-button" onClick={onPlay}>
-          Start
+          {t('start')}
         </button>
       )}
 
@@ -57,16 +60,16 @@ export function PlaybackControls({
             +0.5s
           </button>
           <button className="control-button" onClick={() => onOffsetChange(0)}>
-            Reset
+            {t('reset')}
           </button>
           <button className="control-button" onClick={onStop}>
-            Stop
+            {t('stop')}
           </button>
           <button className="control-button" onClick={status === 'paused' ? onPlay : onPause}>
-            {status === 'paused' ? 'Resume' : 'Pause'}
+            {status === 'paused' ? t('resume') : t('pause')}
           </button>
           <div className="font-size-control">
-            <span className="font-size-label" aria-hidden="true">Aa</span>
+            <span className="font-size-label" aria-hidden="true">{t('fontSizeLabel')}</span>
             <input
               type="range"
               min="36"
@@ -74,15 +77,15 @@ export function PlaybackControls({
               value={fontSize}
               onChange={(e) => onFontSizeChange(Number(e.target.value))}
               className="font-size-slider"
-              aria-label="Font size"
+              aria-label={t('fontSizeLabel')}
               aria-valuetext={`${fontSize} pixels`}
             />
           </div>
           <button className="control-button" onClick={onDimToggle}>
-            {isDimmed ? 'Bright' : 'Dim'}
+            {isDimmed ? t('bright') : t('dim')}
           </button>
           <button className="control-button" onClick={onHighContrastToggle}>
-            {isHighContrast ? 'Normal' : 'Contrast'}
+            {isHighContrast ? t('normal') : t('contrast')}
           </button>
         </>
       )}

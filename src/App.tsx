@@ -7,6 +7,7 @@ import { usePlaybackEngine } from './hooks/usePlaybackEngine'
 import { usePersistedSettings } from './hooks/usePersistedSettings'
 import { useWakeLock } from './hooks/useWakeLock'
 import { RotateOverlay } from './pwa/RotateOverlay'
+import { useLanguage } from './i18n/LanguageContext'
 import type { ParsedSubtitle } from './types/subtitle'
 import type { ImportError } from './utils/errors'
 import type { StoredSubtitle } from './db/database'
@@ -17,6 +18,7 @@ function App() {
   const [error, setError] = useState<string | null>(null)
   const [savedSubtitles, setSavedSubtitles] = useState<StoredSubtitle[]>([])
 
+  const { t, lang, setLang } = useLanguage()
   const { settings, updateSettings } = usePersistedSettings()
   const { state: playbackState, play, pause, stop } = usePlaybackEngine(subtitle?.cues ?? [], settings.offsetMs)
   const { enable: enableWakeLock, disable: disableWakeLock } = useWakeLock()
@@ -162,10 +164,17 @@ function App() {
   if (!subtitle) {
     return (
       <div className="app">
+        <button
+          className="language-toggle"
+          onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
+          aria-label="Toggle language"
+        >
+          {lang === 'en' ? '中文' : 'EN'}
+        </button>
         <RotateOverlay />
         {savedSubtitles.length > 0 && (
           <div className="saved-movies">
-            <h2 className="saved-movies-title">Continue with saved movie</h2>
+            <h2 className="saved-movies-title">{t('continueWithSaved')}</h2>
             {savedSubtitles.map((stored) => (
               <div key={stored.id} className="saved-movie-item">
                 <button
@@ -180,7 +189,7 @@ function App() {
                 <button
                   className="saved-movie-delete"
                   onClick={() => handleDeleteSubtitle(stored.id)}
-                  aria-label={`Delete ${stored.fileName}`}
+                  aria-label={t('deleteMovie', { fileName: stored.fileName })}
                 >
                   ×
                 </button>
@@ -196,6 +205,13 @@ function App() {
   // Ready view: subtitle loaded, playback idle
   return (
     <div className="app">
+      <button
+        className="language-toggle"
+        onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
+        aria-label="Toggle language"
+      >
+        {lang === 'en' ? '中文' : 'EN'}
+      </button>
       <RotateOverlay />
       <CuePreview
         subtitle={subtitle}

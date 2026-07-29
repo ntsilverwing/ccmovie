@@ -2,6 +2,7 @@ import { useState, useRef, DragEvent, ChangeEvent } from 'react'
 import type { ParsedSubtitle } from '../types/subtitle'
 import { importSRT } from '../imports/fileImport'
 import { ImportError } from '../utils/errors'
+import { useLanguage } from '../i18n/LanguageContext'
 
 interface FilePickerProps {
   onImport: (result: ParsedSubtitle) => void
@@ -15,6 +16,7 @@ interface FilePickerProps {
 export const FilePicker: React.FC<FilePickerProps> = ({ onImport, onError }) => {
   const [isDragging, setIsDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const { t } = useLanguage()
 
   const handleFile = async (file: File) => {
     try {
@@ -65,7 +67,7 @@ export const FilePicker: React.FC<FilePickerProps> = ({ onImport, onError }) => 
         style={{ display: 'none' }}
         onChange={handleInputChange}
       />
-      <p className="drop-text">Drop SRT file here or tap to browse</p>
+      <p className="drop-text">{t('dropSRT')}</p>
     </div>
   )
 }

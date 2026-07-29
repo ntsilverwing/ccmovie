@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLanguage } from '../i18n/LanguageContext'
 
 /**
  * RotateOverlay — full-screen overlay shown when device is in portrait mode.
@@ -14,6 +15,7 @@ export function RotateOverlay() {
   const [isPortrait, setIsPortrait] = useState(
     window.matchMedia('(orientation: portrait)').matches
   )
+  const { t } = useLanguage()
 
   useEffect(() => {
     const mql = window.matchMedia('(orientation: portrait)')
@@ -28,7 +30,7 @@ export function RotateOverlay() {
     <div className="rotate-overlay">
       <div className="rotate-content">
         <span className="rotate-icon">🔄</span>
-        <p>请旋转手机 / Rotate to Landscape</p>
+        <p>{t('rotateToLandscape')}</p>
       </div>
     </div>
   )
