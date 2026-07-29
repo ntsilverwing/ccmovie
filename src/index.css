@@ -215,6 +215,27 @@ body.high-contrast {
   gap: 16px;
   align-items: center;
   z-index: 100;
+  transition: opacity 0.3s ease;
+}
+
+.playback-controls.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Fullscreen — pure black background, remove max-width constraint */
+:fullscreen {
+  background: #000000;
+}
+
+::backdrop {
+  background: #000000;
+}
+
+:fullscreen .app {
+  max-width: none;
+  margin: 0;
+  padding: 0;
 }
 
 /* Control buttons — large touch targets for dark theater use */

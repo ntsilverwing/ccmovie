@@ -13,6 +13,7 @@ interface PlaybackControlsProps {
   isHighContrast: boolean
   onOffsetChange: (offsetMs: number) => void
   onHighContrastToggle: () => void
+  controlsVisible: boolean
 }
 
 /**
@@ -34,9 +35,10 @@ export function PlaybackControls({
   isHighContrast,
   onOffsetChange,
   onHighContrastToggle,
+  controlsVisible,
 }: PlaybackControlsProps) {
   return (
-    <div className="playback-controls">
+    <div className={`playback-controls${controlsVisible ? '' : ' hidden'}`}>
       {status === 'idle' && (
         <button className="start-button" onClick={onPlay}>
           Start
