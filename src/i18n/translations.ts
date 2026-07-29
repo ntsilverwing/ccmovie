@@ -5,6 +5,7 @@ const translations = {
     // App.tsx
     continueWithSaved: 'Continue with saved movie',
     deleteMovie: 'Delete {fileName}',
+    back: 'Back',
 
     // PlaybackControls.tsx
     start: 'Start',
@@ -49,6 +50,7 @@ const translations = {
     // App.tsx
     continueWithSaved: '继续观看已保存影片',
     deleteMovie: '删除 {fileName}',
+    back: '返回',
 
     // PlaybackControls.tsx
     start: '开始',

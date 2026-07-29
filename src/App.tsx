@@ -224,6 +224,13 @@ function App() {
   return (
     <div className="app">
       <button
+        className="back-button"
+        onClick={() => { setSubtitle(null); setError(null) }}
+        aria-label={t('back')}
+      >
+        ‹ {t('back')}
+      </button>
+      <button
         className="language-toggle"
         onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
         aria-label="Toggle language"
