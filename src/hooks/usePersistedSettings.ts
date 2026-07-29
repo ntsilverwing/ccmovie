@@ -12,6 +12,8 @@ export interface Settings {
   offsetMs: number
   /** High contrast mode — yellow text on black */
   isHighContrast: boolean
+  /** UI language — 'en' or 'zh' */
+  lang: 'en' | 'zh'
 }
 
 /** localStorage key for settings */
@@ -23,6 +25,7 @@ const DEFAULT_SETTINGS: Settings = {
   isDimmed: false,
   offsetMs: 0,
   isHighContrast: false,
+  lang: 'zh',
 }
 
 /**
@@ -32,7 +35,7 @@ const DEFAULT_SETTINGS: Settings = {
  * - isDimmed must be a boolean
  * - Falls back to DEFAULT_SETTINGS on any parse error or missing data
  */
-function loadSettings(): Settings {
+export function loadSettings(): Settings {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY)
     if (!raw) return DEFAULT_SETTINGS
@@ -49,7 +52,10 @@ function loadSettings(): Settings {
     const isHighContrast = typeof parsed.isHighContrast === 'boolean'
       ? parsed.isHighContrast
       : DEFAULT_SETTINGS.isHighContrast
-    return { fontSize, isDimmed, offsetMs, isHighContrast }
+    const lang = parsed.lang === 'en' || parsed.lang === 'zh'
+      ? parsed.lang
+      : DEFAULT_SETTINGS.lang
+    return { fontSize, isDimmed, offsetMs, isHighContrast, lang }
   } catch {
     return DEFAULT_SETTINGS
   }
