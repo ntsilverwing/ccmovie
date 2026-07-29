@@ -87,6 +87,7 @@ export class PlaybackEngine {
    * On resume, adjusts startTime to preserve the paused position.
    */
   play(): void {
+    if (this.isPlaying) return // guard against duplicate play calls
     this.startTime = performance.now() - this.pausedElapsed
     this.lastIndex = -1
     this.isPlaying = true
