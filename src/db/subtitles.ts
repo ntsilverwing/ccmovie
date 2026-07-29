@@ -39,7 +39,8 @@ export async function getSubtitle(id: string): Promise<StoredSubtitle | undefine
 export async function getAllSubtitles(): Promise<StoredSubtitle[]> {
   try {
     const db = await getDB()
-    return db.getAllFromIndex('subtitles', 'by-importedAt')
+    const results = await db.getAllFromIndex('subtitles', 'by-importedAt')
+    return results.reverse() // newest-first
   } catch (err) {
     throw new Error(`Failed to get all subtitles: ${err instanceof Error ? err.message : String(err)}`)
   }
