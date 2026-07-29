@@ -36,24 +36,17 @@ export function useWakeLock() {
     getNoSleep().disable()
   }, [getNoSleep])
 
-  // Re-acquire Wake Lock when returning to app during active playback
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        // Re-enable if the NoSleep instance exists and was previously enabled
-        // The native Wake Lock API auto-releases on visibility change
-        if (noSleepRef.current) {
-          // enable() returns a Promise per runtime implementation; type def says void
-          void (noSleepRef.current.enable() as unknown as Promise<void>).catch(() => {
-            // Silently fail — may not be in a user gesture context
-          })
-        }
-      }
-    }
+  // NOTE: Wake Lock re-acquisition on visibilitychange is intentionally NOT
+  // implemented here. The native Wake Lock API requires a user gesture
+  // (click/touch) to re-acquire — visibilitychange is NOT a user gesture,
+  // so the browser rejects the request with a SecurityError. Instead, the
+  // app should call the exposed `enable()` from a user gesture handler
+  // (e.g., Resume button) when the user returns to the app.
 
-    document.addEventListener('visibilitychange', handleVisibilityChange)
+  // Cleanup: release Wake Lock when the component unmounts
+  useEffect(() => {
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      noSleepRef.current?.disable()
     }
   }, [])
 
