@@ -62,6 +62,7 @@ export class PlaybackEngine {
   private rafId: number | null = null
   private lastIndex: number = -1
   private offsetMs: number = 0
+  private pausedElapsed: number = 0
   private cues: Cue[]
 
   private onCueChange: (index: number) => void
@@ -81,11 +82,12 @@ export class PlaybackEngine {
   }
 
   /**
-   * Start playback from the beginning.
-   * Records startTime via performance.now() and starts the rAF loop.
+   * Start or resume playback.
+   * On fresh start, records startTime via performance.now().
+   * On resume, adjusts startTime to preserve the paused position.
    */
   play(): void {
-    this.startTime = performance.now()
+    this.startTime = performance.now() - this.pausedElapsed
     this.lastIndex = -1
     this.isPlaying = true
     this.tick()
@@ -100,6 +102,7 @@ export class PlaybackEngine {
       this.rafId = null
     }
     this.isPlaying = false
+    this.pausedElapsed = performance.now() - this.startTime
   }
 
   /**
@@ -112,6 +115,7 @@ export class PlaybackEngine {
     }
     this.isPlaying = false
     this.lastIndex = -1
+    this.pausedElapsed = 0
     this.onCueChange(-1)
   }
 
