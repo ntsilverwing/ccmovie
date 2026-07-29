@@ -135,6 +135,10 @@ export class PlaybackEngine {
    * only when the active cue changes. Auto-stop when all cues passed.
    */
   private tick = (): void => {
+    if (this.cues.length === 0) {
+      this.stop()
+      return
+    }
     const elapsed = performance.now() - this.startTime + this.offsetMs
     const activeIndex = findActiveCue(this.cues, elapsed, this.lastIndex)
 
