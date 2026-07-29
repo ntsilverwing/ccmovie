@@ -19,7 +19,7 @@ const SETTINGS_KEY = 'cinemasyncsubs-settings'
 
 /** Default settings used when no stored settings exist */
 const DEFAULT_SETTINGS: Settings = {
-  fontSize: 48,
+  fontSize: 36,
   isDimmed: false,
   offsetMs: 0,
   isHighContrast: false,

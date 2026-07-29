@@ -6,7 +6,7 @@
   /* Cinema display tokens — OLED-optimized */
   --subtitle-bg: #000000;
   --subtitle-color: #e0e0e0;
-  --subtitle-font-size: 48px;
+  --subtitle-font-size: 36px;
   --subtitle-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
   --subtitle-font-weight: 500;
   --subtitle-max-width: 80vw;
@@ -212,9 +212,12 @@ body.high-contrast {
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 16px;
+  gap: 8px;
   align-items: center;
   z-index: 100;
+  max-width: 90vw;
+  flex-wrap: wrap;
+  justify-content: center;
   transition: opacity 0.3s ease;
 }
 
@@ -240,10 +243,10 @@ body.high-contrast {
 
 /* Control buttons — large touch targets for dark theater use */
 .control-button {
-  min-width: 88px;
-  min-height: 48px;
-  padding: 12px 24px;
-  font-size: 1rem;
+  min-width: 64px;
+  min-height: 44px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
   background: #222;
   color: #e0e0e0;
   border: 1px solid #444;
@@ -256,17 +259,30 @@ body.high-contrast {
 }
 
 /* Font size slider */
+.font-size-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.font-size-label {
+  font-size: 0.9rem;
+  color: #888;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 .font-size-slider {
-  width: 160px;
+  width: 100px;
   accent-color: #888;
 }
 
 /* Offset display — shows current timing offset value */
 .offset-display {
-  min-width: 64px;
+  min-width: 48px;
   text-align: center;
   font-family: monospace;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #e0e0e0;
   user-select: none;
   -webkit-user-select: none;
@@ -410,5 +426,22 @@ body.high-contrast {
 @media (orientation: landscape) {
   .rotate-overlay {
     display: none;
+  }
+}
+
+/* Landscape compaction — shorter controls for narrow landscape viewports */
+@media (orientation: landscape) and (max-height: 500px) {
+  .playback-controls {
+    bottom: 12px;
+    gap: 6px;
+  }
+  .control-button {
+    min-width: 56px;
+    min-height: 40px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+  .font-size-slider {
+    width: 80px;
   }
 }
