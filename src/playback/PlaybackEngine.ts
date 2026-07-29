@@ -98,6 +98,7 @@ export class PlaybackEngine {
    * Pause playback. Cancels the rAF loop but preserves position.
    */
   pause(): void {
+    if (!this.isPlaying) return // guard against double-pause
     if (this.rafId !== null) {
       cancelAnimationFrame(this.rafId)
       this.rafId = null
