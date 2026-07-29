@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon-192.png', 'icon-512.png', 'splash.png'],
       manifest: {
-        name: 'CinemaSyncSubs',
-        short_name: 'CinemaSubs',
-        description: 'Synchronized cinema subtitles on your phone',
+        name: 'CC Movie',
+        short_name: 'CC Movie',
+        description: '影院同步字幕工具',
         theme_color: '#000000',
         background_color: '#000000',
         display: 'standalone',
