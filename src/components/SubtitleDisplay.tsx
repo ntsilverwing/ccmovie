@@ -36,7 +36,7 @@ export function SubtitleDisplay({ cue, fontSize, isDimmed, isHighContrast }: Sub
   }, [isHighContrast])
 
   return (
-    <div ref={containerRef} className="subtitle-container">
+    <div ref={containerRef} className="subtitle-container" role="status" aria-live="polite" aria-atomic="true">
       <p className="subtitle-text">{cue?.text ?? ''}</p>
     </div>
   )
