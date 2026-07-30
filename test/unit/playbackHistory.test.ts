@@ -138,8 +138,9 @@ describe('playbackHistory', () => {
     it('pushes over arbitrary foreign states ({view:"selection"} counts as foreign)', () => {
       const h = new FakeHistory()
       h.pushState({ view: 'selection' }, '')
+      const pushesBeforeEnter = h.pushCount
       enterPlaybackHistory(h)
-      expect(h.pushCount).toBe(1)
+      expect(h.pushCount).toBe(pushesBeforeEnter + 1)
       expect(h.replaceCount).toBe(0)
       expect(isPlaybackEntry(h.state)).toBe(true)
     })
