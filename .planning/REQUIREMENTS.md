@@ -10,7 +10,7 @@ Current milestone scope. Both rest on the same mechanism: a wall-clock-based pla
 
 ### Playback
 
-- [ ] **PLAY-08**: User can return from playback page to subtitle selection without losing playback state
+- [x] **PLAY-08**: User can return from playback page to subtitle selection without losing playback state
   - 播放控制栏提供弱化返回项（低视觉权重，防误触）
   - 接管 Android PWA 系统返回手势/返回键：回到选择页而非退出应用
   - 返回保留全部播放状态（当前字幕、时间偏移、显示设置）；时钟基于真实时间（startedAt 时间戳）继续走
@@ -97,10 +97,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PWA-01 | Phase 3 (v1.0) | Complete |
 | PWA-02 | Phase 3 (v1.0) | Complete |
 | PWA-03 | Phase 3 (v1.0) | Complete |
-| PLAY-08 | Phase 5 (v1.1) | Pending |
+| PLAY-08 | Phase 5 (v1.1) | Complete |
 | FILE-03 | Phase 6 (v1.1) | Pending |
 
 **Coverage:**
+
 - v1 requirements: 15 total, all shipped
 - v1.1 requirements: 2 total, 2/2 mapped to roadmap (PLAY-08 → Phase 5, FILE-03 → Phase 6)
 

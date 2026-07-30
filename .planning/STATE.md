@@ -5,15 +5,15 @@ milestone_name: Session Resilience
 current_phase: 05
 current_phase_name: lossless-playback-navigation
 status: executing
-stopped_at: Phase 5 planned (4 plans, 3 waves)
-last_updated: "2026-07-30T21:21:13.873Z"
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-07-30T21:25:09.571Z"
 last_activity: 2026-07-30
 last_activity_desc: Phase 05 execution started
 progress:
   total_phases: 2
   completed_phases: 0
   total_plans: 4
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -29,14 +29,14 @@ See: .planning/PROJECT.md (updated 2026-07-30)
 
 **Version:** v1.1 — Session Resilience
 **Goal:** 播放会话基于真实时间轴持久化——返回不误丢、杀进程可续播
-**Status:** Executing Phase 05
+**Status:** Ready to execute
 **Started:** 2026-07-30
 
 ## Current Position
 
 Phase: 05 (lossless-playback-navigation) — EXECUTING
-Plan: 1 of 4
-Status: Executing Phase 05
+Plan: 2 of 4
+Status: Ready to execute
 Last activity: 2026-07-30 — Phase 05 execution started
 
 Progress (v1.1): [░░░░░░░░░░] 0%
@@ -45,6 +45,11 @@ Progress (v1.1): [░░░░░░░░░░] 0%
 
 **v1.0 final:** 4 phases, 11 plans, 25 tasks — shipped 2026-07-29 (3-day cycle, 62 files, +9,427 LOC)
 **v1.1:** no plans completed yet
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 05 P01 | 2 min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -60,6 +65,7 @@ Recent decisions affecting current work (full log: PROJECT.md Key Decisions):
 
 - 2026-07-30: FUTR-01 audio auto-sync stays deferred — no legal reference audio in theatrical window; session persistence covers the real pain point (notes/audio-sync-assessment.md)
 - 2026-07-30: v1.1 split into 2 phases — shared wall-clock mechanism delivered with PLAY-08 in Phase 5; IndexedDB durability + resume UX (FILE-03) layered in Phase 6
+- [Phase ?]: Session module reads no clock: every wall-clock value enters via explicit now parameter (deterministic under test, directly persistable by Phase 6)
 
 ### Pending Todos
 
@@ -86,9 +92,9 @@ Items acknowledged and carried forward from v1.0 close (2026-07-29):
 
 ## Session Continuity
 
-Last session: 2026-07-30T20:09:32.567Z
-Stopped at: Phase 5 UI-SPEC approved
-Resume file: .planning/phases/05-lossless-playback-navigation/05-UI-SPEC.md
+Last session: 2026-07-30T21:25:09.562Z
+Stopped at: Completed 05-01-PLAN.md
+Resume file: None
 
 ---
 
