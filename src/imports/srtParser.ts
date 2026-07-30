@@ -54,9 +54,9 @@ export function parseSRT(content: string): ParsedSubtitle {
       continue
     }
 
-    // Step 5: Parse timecode with regex accepting both dot and comma
+    // Step 5: Parse timecode with regex accepting both dot and comma, variable hour digits
     const timeMatch = lines[timecodeIdx].match(
-      /(\d{2}):(\d{2}):(\d{2})[,.](\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})[,.](\d{3})/,
+      /(\d{2,}):(\d{2}):(\d{2})[,.](\d{3})\s*-->\s*(\d{2,}):(\d{2}):(\d{2})[,.](\d{3})/,
     )
     if (!timeMatch) {
       errors.push({
@@ -78,6 +78,25 @@ export function parseSRT(content: string): ParsedSubtitle {
       parseInt(timeMatch[6]) * 60000 +
       parseInt(timeMatch[7]) * 1000 +
       parseInt(timeMatch[8])
+
+    // Step 6a: Validate end > start
+    if (end <= start) {
+      errors.push({
+        line: 0,
+        type: 'invalid_timecode',
+        message: `End time (${timeMatch[5]}) must be after start time (${timeMatch[1]})`,
+      })
+      continue
+    }
+
+    // Step 6b: Detect overlap with previous cue
+    if (cues.length > 0 && start < cues[cues.length - 1].end) {
+      errors.push({
+        line: 0,
+        type: 'overlap',
+        message: `Cue at ${timeMatch[0]} overlaps with previous cue ending at ${formatTimeMs(cues[cues.length - 1].end)}`,
+      })
+    }
 
     // Step 7: Text is everything after the timecode line, joined with \n, trimmed
     const text = lines.slice(timecodeIdx + 1).join('\n').trim()
@@ -112,4 +131,13 @@ export function parseSRT(content: string): ParsedSubtitle {
     },
     errors,
   }
+}
+
+function formatTimeMs(ms: number): string {
+  const totalSeconds = Math.floor(ms / 1000)
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+  const millis = ms % 1000
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')},${String(millis).padStart(3, '0')}`
 }
