@@ -93,7 +93,8 @@ describe('session timing model', () => {
       const s = createSession({ ...BASE, now: T })
       const paused = pauseSession(s, T + 60_000)
       const resumed = resumeSession(paused, T + 3_600_000)
-      expect(sessionElapsedMs(resumed, T + 3_605_000)).toBe(61_000)
+      // 5000ms after the resume instant: 60000 frozen + 5000 advance
+      expect(sessionElapsedMs(resumed, T + 3_605_000)).toBe(65_000)
     })
 
     it('re-anchors startedAt = now - pausedElapsedMs (engine play() mirror)', () => {
