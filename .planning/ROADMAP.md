@@ -47,11 +47,11 @@ Full v1.0 phase details archived: `.planning/milestones/v1.0-ROADMAP.md`
   3. User returning to the selection page sees a brief "original subtitle retained, continue playing" hint, with full playback state intact (current cue, timing offset, display settings)
   4. User re-entering playback resumes at the exact position implied by real elapsed time (`now − startedAt + offset`) — no manual re-sync needed
 
-**Plans**: 1/4 plans executed
+**Plans**: 2/4 plans executed
 **Plan list**:
 
 - [x] 05-01-PLAN.md — Wall-clock session timing model (TDD: session.ts + vitest RED/GREEN)
-- [ ] 05-02-PLAN.md — Navigation history interception policy (TDD: playbackHistory.ts + vitest RED/GREEN)
+- [x] 05-02-PLAN.md — Navigation history interception policy (TDD: playbackHistory.ts + vitest RED/GREEN)
 - [ ] 05-03-PLAN.md — Session UI surfaces (SessionBanner, SessionToast, low-weight back control, i18n, CSS)
 - [ ] 05-04-PLAN.md — App.tsx integration: view decoupling, popstate interception, leave/resume flows, device checkpoint
 
@@ -96,7 +96,7 @@ Phases execute in numeric order: 5 → 6
 | 2. Playback & Display | v1.0 | 3/3 | Complete | 2026-07-27 |
 | 3. Cinema Readiness | v1.0 | 5/5 | Complete | 2026-07-29 |
 | 4. Polish & Accessibility | v1.0 | 1/1 | Complete | 2026-07-29 |
-| 5. Lossless Playback Navigation | v1.1 | 1/4 | In Progress|  |
+| 5. Lossless Playback Navigation | v1.1 | 2/4 | In Progress|  |
 | 6. Session Persistence & Resume | v1.1 | 0/TBD | Not started | - |
 
 ## Coverage
