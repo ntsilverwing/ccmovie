@@ -8,6 +8,18 @@
 
 让非英语母语观众在影院看外语片时能跟上剧情——即使没有 CC 设备或 CC 只有英法字幕。
 
+## Current Milestone: v1.1 Session Resilience
+
+**Goal:** 播放会话基于真实时间轴持久化——返回不误丢、杀进程可续播，彻底消除"手动重新对轴"的痛点。
+
+**Target features:**
+- 播放页无损返回选择页，状态全保留（PLAY-08）
+- 会话持久化与断点续播，含续播卡片（FILE-03）
+
+**Key context:**
+- 两项需求共用同一机制：wall-clock 播放会话（字幕 ID + startedAt 时间戳 + 偏移）持久化到 IndexedDB
+- FUTR-01（音频自动对齐）经评估保持 deferred：上映窗口期无合法参照音频，且真痛点已被会话持久化覆盖
+
 ## Requirements
 
 ### Validated
@@ -26,7 +38,8 @@
 
 ### Active
 
-（无 — v1.0 所有需求已完成）
+- [ ] 用户可从播放页无损返回字幕选择页，播放状态完整保留（PLAY-08）— v1.1
+- [ ] 播放会话跨刷新/杀进程持久化，重进可从正确位置一键续播（FILE-03）— v1.1
 
 ### Out of Scope
 
@@ -74,7 +87,25 @@
 | 中英双语 | 目标用户需求 | ✅ 验证：i18n 完整 |
 | Fullscreen API | 影院场景需隐藏状态栏 | ✅ 验证：自动全屏 + 手动切换 |
 | Wake Lock 双策略 | iOS 版本兼容性 | ✅ 验证：原生 + NoSleep.js |
+| FUTR-01 音频对齐保持 deferred | 上映窗口期无合法参照音频；会话持久化已覆盖真痛点 | — v1.1 评估结论 |
+
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd-transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd-complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
 
 ---
 
-*Last updated: 2026-07-29 after v1.0 milestone*
+*Last updated: 2026-07-30 after v1.1 milestone start*

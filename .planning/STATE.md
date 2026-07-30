@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Session Resilience
-current_phase: 5
-current_phase_name: Lossless Playback Navigation; v1.1 spans Phases 5-6
-status: planning
+current_phase: 05
+current_phase_name: lossless-playback-navigation
+status: executing
 stopped_at: Phase 5 planned (4 plans, 3 waves)
-last_updated: "2026-07-30T20:09:32.575Z"
+last_updated: "2026-07-30T21:21:13.873Z"
 last_activity: 2026-07-30
-last_activity_desc: Phase 5 planned (4 plans, 3 waves — session model + history policy TDD, UI surfaces, integration)
+last_activity_desc: Phase 05 execution started
 progress:
   total_phases: 2
   completed_phases: 0
-  total_plans: 0
+  total_plans: 4
   completed_plans: 0
   percent: 0
 ---
@@ -23,21 +23,21 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-07-30)
 **Core value:** 让非英语母语观众在影院看外语片时能跟上剧情
-**Current focus:** Phase 5 — Lossless Playback Navigation
+**Current focus:** Phase 05 — lossless-playback-navigation
 
 ## Milestone
 
 **Version:** v1.1 — Session Resilience
 **Goal:** 播放会话基于真实时间轴持久化——返回不误丢、杀进程可续播
-**Status:** Roadmap created; Phase 5 ready to plan
+**Status:** Executing Phase 05
 **Started:** 2026-07-30
 
 ## Current Position
 
-Phase: 5 of 6 (Lossless Playback Navigation; v1.1 spans Phases 5-6)
-Plan: —
-Status: Ready to plan
-Last activity: 2026-07-30 — v1.1 roadmap created (PLAY-08 → Phase 5, FILE-03 → Phase 6)
+Phase: 05 (lossless-playback-navigation) — EXECUTING
+Plan: 1 of 4
+Status: Executing Phase 05
+Last activity: 2026-07-30 — Phase 05 execution started
 
 Progress (v1.1): [░░░░░░░░░░] 0%
 
