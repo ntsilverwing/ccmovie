@@ -1,0 +1,12 @@
+{
+  // Cloudflare Workers + Static Assets 配置
+  // wrangler deploy 读取此文件，替代旧版 Pages 的 "Build output directory" 字段
+  "name": "ccmovie",
+  "compatibility_date": "2025-07-24",
+  "assets": {
+    // Vite 构建输出目录
+    "directory": "./dist",
+    // SPA 模式：未匹配的路径回退到 index.html（与 SW 的 navigateFallback 一致）
+    "not_found_handling": "single-page-application"
+  }
+}
