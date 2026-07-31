@@ -98,20 +98,6 @@ export function PlaybackControls({
           <button className="control-button" onClick={onToggleFullscreen}>
             {isFullscreen ? t('exitFullscreen') : t('fullscreen')}
           </button>
-          {/* Truthful wake-lock indicator: rendered ONLY when an actual screen
-             wake lock is held (NoSleep.enabled propagated via useWakeLock).
-             Shown immediately after the fullscreen toggle so the user can see
-             at-a-glance why the screen stays awake. Skipped entirely (not lied
-             about) when the browser/secure-context denies the lock — see
-             useWakeLock.ts enable()/sync() for the truth source. */}
-          {wakeLockActive && (
-            <span className="wake-lock-indicator" aria-live="polite">
-              {t('wakeLockOn')}
-            </span>
-          )}
-          {/* Back control placement: user decision (2026-07-31) overrides
-              UI-SPEC/D-09 — sits AFTER the fullscreen toggle and the wake-lock
-              indicator, as the last item of the playing/paused branch. */}
           {onBack && (
             <button
               className="playback-back"
@@ -121,6 +107,11 @@ export function PlaybackControls({
             >
               ‹ {t('back')}
             </button>
+          )}
+          {wakeLockActive && (
+            <span className="wake-lock-indicator" aria-live="polite">
+              {t('wakeLockOn')}
+            </span>
           )}
         </>
       )}
