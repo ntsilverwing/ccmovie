@@ -502,3 +502,31 @@ body.high-contrast {
 .language-toggle:active {
   background: rgba(68, 68, 68, 0.9);
 }
+
+/* Session toast — passive "subtitle kept" notification (Phase 5, PLAY-08)
+   CSS pattern: .playback-controls fade idiom; z-index 300 slots between
+   .back-button/.language-toggle (200) and .rotate-overlay (9999) */
+.session-toast {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 90vw;
+  z-index: 300;
+  padding: 12px 20px;
+  background: rgba(17, 17, 17, 0.95);
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #e0e0e0;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: center;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.session-toast.hidden {
+  opacity: 0;
+}
