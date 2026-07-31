@@ -18,6 +18,7 @@ interface PlaybackControlsProps {
   isFullscreen: boolean
   onToggleFullscreen: () => void
   wakeLockActive: boolean
+  onBack?: () => void
 }
 
 /**
@@ -43,6 +44,7 @@ export function PlaybackControls({
   isFullscreen,
   onToggleFullscreen,
   wakeLockActive,
+  onBack,
 }: PlaybackControlsProps) {
   const { t } = useLanguage()
 
@@ -56,6 +58,16 @@ export function PlaybackControls({
 
       {(status === 'playing' || status === 'paused') && (
         <>
+          {onBack && (
+            <button
+              className="playback-back"
+              type="button"
+              onClick={onBack}
+              aria-label={t('back')}
+            >
+              ‹ {t('back')}
+            </button>
+          )}
           <button className="control-button" onClick={() => onOffsetChange(offsetMs - 500)}>
             −0.5s
           </button>

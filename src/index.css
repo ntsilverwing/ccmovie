@@ -596,3 +596,22 @@ body.high-contrast {
   background: #331111;
   color: #fff;
 }
+
+/* Playback back control — low-visual-weight (D-09): transparent fill,
+   no border, dim idle state brightening only on :active */
+.playback-back {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: #888;
+  opacity: 0.55;
+  font-size: 0.85rem;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.playback-back:active {
+  opacity: 1;
+  color: #e0e0e0;
+}
