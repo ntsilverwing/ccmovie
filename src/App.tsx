@@ -365,24 +365,29 @@ function App() {
         savedSubtitles={savedSubtitles}
         onSelectSaved={handleSelectSaved}
       />
-      <PlaybackControls
-        status={playbackState.status}
-        onPlay={handlePlay}
-        onPause={handlePause}
-        onStop={handleStop}
-        fontSize={settings.fontSize}
-        isDimmed={settings.isDimmed}
-        onFontSizeChange={(size) => updateSettings({ fontSize: size })}
-        onDimToggle={() => updateSettings({ isDimmed: !settings.isDimmed, isHighContrast: false })}
-        offsetMs={settings.offsetMs}
-        isHighContrast={settings.isHighContrast}
-        onOffsetChange={(offsetMs) => updateSettings({ offsetMs })}
-        onHighContrastToggle={() => updateSettings({ isHighContrast: !settings.isHighContrast, isDimmed: false })}
-        controlsVisible={controlsVisible}
-        isFullscreen={isFullscreen}
-        onToggleFullscreen={handleToggleFullscreen}
-        wakeLockActive={wakeLockActive}
-      />
+      {/* Selection view: the playing/paused toolbar belongs to the playback
+          view ONLY. With a live session (interrupted state) the banner is the
+          sole authority; the idle Start button keeps v1.0 behavior. */}
+      {playbackState.status === 'idle' && (
+        <PlaybackControls
+          status={playbackState.status}
+          onPlay={handlePlay}
+          onPause={handlePause}
+          onStop={handleStop}
+          fontSize={settings.fontSize}
+          isDimmed={settings.isDimmed}
+          onFontSizeChange={(size) => updateSettings({ fontSize: size })}
+          onDimToggle={() => updateSettings({ isDimmed: !settings.isDimmed, isHighContrast: false })}
+          offsetMs={settings.offsetMs}
+          isHighContrast={settings.isHighContrast}
+          onOffsetChange={(offsetMs) => updateSettings({ offsetMs })}
+          onHighContrastToggle={() => updateSettings({ isHighContrast: !settings.isHighContrast, isDimmed: false })}
+          controlsVisible={controlsVisible}
+          isFullscreen={isFullscreen}
+          onToggleFullscreen={handleToggleFullscreen}
+          wakeLockActive={wakeLockActive}
+        />
+      )}
     </div>
   )
 }
