@@ -30,7 +30,7 @@ Full v1.0 phase details archived: `.planning/milestones/v1.0-ROADMAP.md`
 
 **Shared mechanism:** Both v1.1 requirements rest on one wall-clock playback session — subtitle ID + `startedAt` real timestamp + offset — persisted via idb/IndexedDB. Resume position is always `now − startedAt + offset`. Mechanism rationale: `.planning/notes/audio-sync-assessment.md`
 
-- [ ] **Phase 5: Lossless Playback Navigation** — Exit/re-enter playback without losing synced position; playback clock tracks real time
+- [x] **Phase 5: Lossless Playback Navigation** — 4/4 plans, completed 2026-07-30
 - [ ] **Phase 6: Session Persistence & Resume** — Session survives app kill/refresh; one-tap resume card on relaunch
 
 ## Phase Details
@@ -47,13 +47,13 @@ Full v1.0 phase details archived: `.planning/milestones/v1.0-ROADMAP.md`
   3. User returning to the selection page sees a brief "original subtitle retained, continue playing" hint, with full playback state intact (current cue, timing offset, display settings)
   4. User re-entering playback resumes at the exact position implied by real elapsed time (`now − startedAt + offset`) — no manual re-sync needed
 
-**Plans**: 3/4 plans executed
+**Plans**: 4/4 plans executed
 **Plan list**:
 
 - [x] 05-01-PLAN.md — Wall-clock session timing model (TDD: session.ts + vitest RED/GREEN)
 - [x] 05-02-PLAN.md — Navigation history interception policy (TDD: playbackHistory.ts + vitest RED/GREEN)
 - [x] 05-03-PLAN.md — Session UI surfaces (SessionBanner, SessionToast, low-weight back control, i18n, CSS)
-- [ ] 05-04-PLAN.md — App.tsx integration: view decoupling, popstate interception, leave/resume flows, device checkpoint
+- [x] 05-04-PLAN.md — App.tsx integration: view decoupling, popstate interception, leave/resume flows, device checkpoint
 
 **UI hint**: yes
 
@@ -96,7 +96,7 @@ Phases execute in numeric order: 5 → 6
 | 2. Playback & Display | v1.0 | 3/3 | Complete | 2026-07-27 |
 | 3. Cinema Readiness | v1.0 | 5/5 | Complete | 2026-07-29 |
 | 4. Polish & Accessibility | v1.0 | 1/1 | Complete | 2026-07-29 |
-| 5. Lossless Playback Navigation | v1.1 | 3/4 | In Progress|  |
+| 5. Lossless Playback Navigation | v1.1 | 4/4 | Complete | 2026-07-30 |
 | 6. Session Persistence & Resume | v1.1 | 0/TBD | Not started | - |
 
 ## Coverage
