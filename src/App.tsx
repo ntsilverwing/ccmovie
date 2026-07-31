@@ -50,7 +50,7 @@ function App() {
     settings.offsetMs,
     activeIdentity
   )
-  const { enable: enableWakeLock, disable: disableWakeLock, isEnabled: wakeLockActive } = useWakeLock()
+  const { enable: enableWakeLock, disable: disableWakeLock, isEnabled: wakeLockActive, sync: syncWakeLock } = useWakeLock()
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>()
   const [controlsVisible, setControlsVisible] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(!!document.fullscreenElement)
@@ -207,6 +207,13 @@ function App() {
       document.documentElement.requestFullscreen?.().catch(() => {})
     }
   }, [])
+
+  // Wake-lock indicator truth sync: refresh from the library's actual state
+  // on every playback-view entry (enable() is fire-and-forget in the gesture
+  // chain; system releases / NoSleep re-acquires can drift while away).
+  useEffect(() => {
+    if (view === 'playback') syncWakeLock()
+  }, [view, syncWakeLock])
 
   // Auto-hide controls after 3s of inactivity during playback.
   // I-8/discretion #3: view is in the deps so re-entering playback re-arms
