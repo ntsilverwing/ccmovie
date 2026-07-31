@@ -5,8 +5,8 @@ milestone_name: Session Resilience
 current_phase: 05
 current_phase_name: lossless-playback-navigation
 status: executing
-stopped_at: Completed 05-02-PLAN.md
-last_updated: "2026-07-30T21:28:43.639Z"
+stopped_at: Completed 05-03-PLAN.md
+last_updated: "2026-07-31T02:44:08.504Z"
 last_activity: 2026-07-30
 last_activity_desc: Phase 05 execution started
 progress:
@@ -35,7 +35,7 @@ See: .planning/PROJECT.md (updated 2026-07-30)
 ## Current Position
 
 Phase: 05 (lossless-playback-navigation) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-07-30 — Phase 05 execution started
 
@@ -51,6 +51,7 @@ Progress (v1.1): [░░░░░░░░░░] 0%
 |------|----------|-------|-------|
 | Phase 05 P01 | 2 min | 3 tasks | 2 files |
 | Phase 05-lossless-playback-navigation P02 | 2 min | 2 tasks | 2 files |
+| Phase 05-lossless-playback-navigation P05-03 | 2min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,8 @@ Recent decisions affecting current work (full log: PROJECT.md Key Decisions):
 - 2026-07-30: FUTR-01 audio auto-sync stays deferred — no legal reference audio in theatrical window; session persistence covers the real pain point (notes/audio-sync-assessment.md)
 - 2026-07-30: v1.1 split into 2 phases — shared wall-clock mechanism delivered with PLAY-08 in Phase 5; IndexedDB durability + resume UX (FILE-03) layered in Phase 6
 - [Phase ?]: Session module reads no clock: every wall-clock value enters via explicit now parameter (deterministic under test, directly persistable by Phase 6)
+- [Phase 05-lossless-playback-navigation]: resumePlayingAria split from resumePlaying — one key cannot hold both Resume and Resume {fileName}; planner-documented deviation accepted, both keys present in en+zh — Type-lock arity of t() interpolation keys
+- [Phase 05-lossless-playback-navigation]: Adopted uncommitted partial work from interrupted prior executor run; verified against plan+UI-SPEC, split CSS by hunk into per-task atomic commits — Orchestrator-approved takeover; no content changes needed after review
 
 ### Pending Todos
 
@@ -93,8 +96,8 @@ Items acknowledged and carried forward from v1.0 close (2026-07-29):
 
 ## Session Continuity
 
-Last session: 2026-07-30T21:28:43.631Z
-Stopped at: Completed 05-02-PLAN.md
+Last session: 2026-07-31T02:43:48.793Z
+Stopped at: Completed 05-03-PLAN.md
 Resume file: None
 
 ---
