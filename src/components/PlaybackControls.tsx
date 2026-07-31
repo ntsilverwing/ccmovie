@@ -58,16 +58,6 @@ export function PlaybackControls({
 
       {(status === 'playing' || status === 'paused') && (
         <>
-          {onBack && (
-            <button
-              className="playback-back"
-              type="button"
-              onClick={onBack}
-              aria-label={t('back')}
-            >
-              ‹ {t('back')}
-            </button>
-          )}
           <button className="control-button" onClick={() => onOffsetChange(offsetMs - 500)}>
             −0.5s
           </button>
@@ -108,6 +98,18 @@ export function PlaybackControls({
           <button className="control-button" onClick={onToggleFullscreen}>
             {isFullscreen ? t('exitFullscreen') : t('fullscreen')}
           </button>
+          {/* Back control placement: user decision (2026-07-31) overrides
+              UI-SPEC/D-09 — sits AFTER the fullscreen toggle, not first. */}
+          {onBack && (
+            <button
+              className="playback-back"
+              type="button"
+              onClick={onBack}
+              aria-label={t('back')}
+            >
+              ‹ {t('back')}
+            </button>
+          )}
           {wakeLockActive && (
             <span className="wake-lock-indicator" aria-live="polite">
               {t('wakeLockOn')}
