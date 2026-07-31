@@ -55,6 +55,9 @@ export function findActiveCue(cues: Cue[], elapsed: number, hint: number): numbe
  * NEVER use setTimeout/setInterval for subtitle timing.
  * NEVER use the rAF callback timestamp for timing.
  * NEVER accumulate frame deltas.
+ *
+ * The optional onEnded callback exists so React state can converge to idle
+ * when the engine self-stops (05-CONTEXT.md the agent's discretion #4).
  */
 export class PlaybackEngine {
   private startTime: number = 0
@@ -66,10 +69,12 @@ export class PlaybackEngine {
   private cues: Cue[]
 
   private onCueChange: (index: number) => void
+  private onEnded?: () => void
 
-  constructor(cues: Cue[], onCueChange: (index: number) => void) {
+  constructor(cues: Cue[], onCueChange: (index: number) => void, onEnded?: () => void) {
     this.cues = cues
     this.onCueChange = onCueChange
+    this.onEnded = onEnded
   }
 
   /**
@@ -129,6 +134,24 @@ export class PlaybackEngine {
   }
 
   /**
+   * Re-anchor the engine to an offset-INCLUSIVE elapsed position — the same
+   * position space the session banner displays (sessionElapsedMs).
+   *
+   * Android-suspend rationale: performance.now() is monotonic and may FREEZE
+   * across device sleep, while the session wall clock does not. seekTo snaps
+   * the engine back onto the wall-clock session before play() on the
+   * banner-resume path, so the resumed subtitle agrees with the banner.
+   *
+   * Safe on the playing path: only startTime and the cue hint are touched —
+   * no pause/stop, no rAF rescheduling; the next tick re-fires the active
+   * cue for the re-anchored position (lastIndex = -1).
+   */
+  seekTo(elapsedMs: number): void {
+    this.startTime = performance.now() - (elapsedMs - this.offsetMs)
+    this.lastIndex = -1
+  }
+
+  /**
    * Tick function — the rAF callback.
    *
    * Computes absolute elapsed time, finds active cue, and notifies
@@ -136,7 +159,10 @@ export class PlaybackEngine {
    */
   private tick = (): void => {
     if (this.cues.length === 0) {
+      // Internal auto-stop: fire onEnded AFTER stop() so state is settled
+      // before the callback runs (discretion #4 idle convergence).
       this.stop()
+      this.onEnded?.()
       return
     }
     const elapsed = performance.now() - this.startTime + this.offsetMs
@@ -147,9 +173,12 @@ export class PlaybackEngine {
       this.onCueChange(activeIndex)
     }
 
-    // Auto-stop when elapsed exceeds last cue's end time
+    // Auto-stop when elapsed exceeds last cue's end time.
+    // Internal path only — the public stop() never fires onEnded (the
+    // hook's explicit stop clears the session itself; no double dispatch).
     if (activeIndex === -1 && this.cues.length > 0 && elapsed >= this.cues[this.cues.length - 1].end) {
       this.stop()
+      this.onEnded?.()
       return
     }
 
