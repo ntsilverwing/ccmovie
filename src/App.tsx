@@ -211,8 +211,13 @@ function App() {
   // Wake-lock indicator truth sync: refresh from the library's actual state
   // on every playback-view entry (enable() is fire-and-forget in the gesture
   // chain; system releases / NoSleep re-acquires can drift while away).
+  // Re-sync once immediately and once after a short delay — the async
+  // NoSleep.enable() may still be in-flight when the first sync() runs.
   useEffect(() => {
-    if (view === 'playback') syncWakeLock()
+    if (view !== 'playback') return
+    syncWakeLock()
+    const timer = setTimeout(() => syncWakeLock(), 500)
+    return () => clearTimeout(timer)
   }, [view, syncWakeLock])
 
   // Auto-hide controls after 3s of inactivity during playback.
