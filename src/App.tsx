@@ -50,7 +50,7 @@ function App() {
     settings.offsetMs,
     activeIdentity
   )
-  const { enable: enableWakeLock, disable: disableWakeLock, isEnabled: wakeLockActive, sync: syncWakeLock } = useWakeLock()
+  const { enable: enableWakeLock, disable: disableWakeLock, sync: syncWakeLock } = useWakeLock()
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>()
   const [controlsVisible, setControlsVisible] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(!!document.fullscreenElement)
@@ -286,7 +286,6 @@ function App() {
           controlsVisible={controlsVisible}
           isFullscreen={isFullscreen}
           onToggleFullscreen={handleToggleFullscreen}
-          wakeLockActive={wakeLockActive}
         />
       </div>
     )
@@ -392,7 +391,6 @@ function App() {
           controlsVisible={controlsVisible}
           isFullscreen={isFullscreen}
           onToggleFullscreen={handleToggleFullscreen}
-          wakeLockActive={wakeLockActive}
         />
       )}
     </div>
