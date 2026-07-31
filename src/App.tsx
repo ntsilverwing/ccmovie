@@ -3,11 +3,14 @@ import { FilePicker } from './components/FilePicker'
 import { CuePreview } from './components/CuePreview'
 import { SubtitleDisplay } from './components/SubtitleDisplay'
 import { PlaybackControls } from './components/PlaybackControls'
+import { SessionBanner } from './components/SessionBanner'
+import { SessionToast } from './components/SessionToast'
 import { usePlaybackEngine } from './hooks/usePlaybackEngine'
 import { usePersistedSettings } from './hooks/usePersistedSettings'
 import { useWakeLock } from './hooks/useWakeLock'
 import { RotateOverlay } from './pwa/RotateOverlay'
 import { useLanguage } from './i18n/LanguageContext'
+import { enterPlaybackHistory, exitPlaybackHistory, isPlaybackEntry } from './playback/playbackHistory'
 import type { ParsedSubtitle } from './types/subtitle'
 import type { ImportError } from './utils/errors'
 import type { StoredSubtitle } from './db/database'
@@ -20,7 +23,33 @@ function App() {
 
   const { t, lang, setLang } = useLanguage()
   const { settings, updateSettings } = usePersistedSettings()
-  const { state: playbackState, play, pause, stop } = usePlaybackEngine(subtitle?.cues ?? [], settings.offsetMs)
+
+  // Phase 5 (PLAY-08): view decoupled from playback status — the engine may
+  // keep clocking in the background while the user is on the selection view.
+  const [view, setView] = useState<'selection' | 'playback'>('selection')
+  const viewRef = useRef(view)
+  useEffect(() => {
+    viewRef.current = view
+  }, [view])
+  // Kept-session toast trigger (I-1/I-2): bumped by every leave transition.
+  const [lastLeftAt, setLastLeftAt] = useState<number | null>(null)
+
+  // Session identity: saved-record id when a filename match exists, raw
+  // fileName otherwise (soft-link fallback documented on SessionIdentity).
+  const activeIdentity = subtitle
+    ? {
+        subtitleId:
+          savedSubtitles.find((s) => s.fileName === subtitle.metadata.fileName)?.id ??
+          subtitle.metadata.fileName,
+        fileName: subtitle.metadata.fileName,
+      }
+    : null
+
+  const { state: playbackState, play, pause, stop, session, resyncToSession } = usePlaybackEngine(
+    subtitle?.cues ?? [],
+    settings.offsetMs,
+    activeIdentity
+  )
   const { enable: enableWakeLock, disable: disableWakeLock, isEnabled: wakeLockActive } = useWakeLock()
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>()
   const [controlsVisible, setControlsVisible] = useState(true)
@@ -98,8 +127,51 @@ function App() {
         // Fullscreen not supported or denied — fail silently, playback continues
       })
     }
+    // Register the playback history marker BEFORE any engine/react update
+    // (D-01; push-vs-replace policy owned by the 05-02-tested module — D-02)
+    enterPlaybackHistory(window.history)
+    // Screen-sleep re-anchor (PLAY-08 #4): snap the engine onto the wall-clock
+    // session before play(); no-op on fresh starts and paused resume
+    resyncToSession()
     play()
-  }, [enableWakeLock, play])
+    setView('playback')
+  }, [enableWakeLock, play, resyncToSession])
+
+  // D-04: leave playback with the double release ONLY — Wake Lock +
+  // fullscreen. The engine is deliberately left untouched so the subtitle
+  // clock keeps pace with real time while away (sessionElapsed continuity).
+  const leavePlayback = useCallback(() => {
+    disableWakeLock()
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.().catch(() => {})
+    }
+    setView('selection')
+    setLastLeftAt(Date.now())
+  }, [disableWakeLock])
+
+  // D-01: Android system back during playback lands on the selection view
+  // instead of exiting the PWA. The viewRef guard makes the handler
+  // idempotent against crafted back/forward churn (T-05-04-01).
+  useEffect(() => {
+    const onPopState = () => {
+      if (viewRef.current !== 'playback') return
+      leavePlayback()
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [leavePlayback])
+
+  // D-01/I-2: back control and system back converge on ONE leave path.
+  // The 05-02-tested policy consumes our marker so a single popstate runs
+  // the identical leave flow; the marker-missing edge leaves directly.
+  const handleBackControl = useCallback(() => {
+    if (viewRef.current !== 'playback') return
+    if (isPlaybackEntry(window.history.state)) {
+      exitPlaybackHistory(window.history)
+    } else {
+      leavePlayback()
+    }
+  }, [leavePlayback])
 
   const handlePause = useCallback(() => {
     disableWakeLock() // screen can sleep when paused
@@ -112,7 +184,21 @@ function App() {
       document.exitFullscreen?.().catch(() => {})
     }
     stop()
+    // View no longer follows status implicitly; D-03 retire the marker in
+    // the same synchronous batch so the next selection-page system back
+    // exits naturally and the idle-convergence effect no-ops. lastLeftAt
+    // stays untouched: deliberate abandon (Dismiss ×) shows no toast (I-1/I-2).
+    setView('selection')
+    exitPlaybackHistory(window.history)
   }, [disableWakeLock, stop])
+
+  // Session invariant: a session never outlives its loaded movie — run the
+  // hook stop FIRST (clears session + engine) before dropping the subtitle.
+  const handleDeselectMovie = useCallback(() => {
+    stop()
+    setSubtitle(null)
+    setError(null)
+  }, [stop])
 
   const handleToggleFullscreen = useCallback(() => {
     if (document.fullscreenElement) {
@@ -122,10 +208,13 @@ function App() {
     }
   }, [])
 
-  // Auto-hide controls after 3s of inactivity during playback
+  // Auto-hide controls after 3s of inactivity during playback.
+  // I-8/discretion #3: view is in the deps so re-entering playback re-arms
+  // the timer; selection views keep controls visible even while a session
+  // plays in the background.
   useEffect(() => {
-    // Only auto-hide during active playback (not paused)
-    if (playbackState.status !== 'playing') {
+    // Only auto-hide during active playback (not paused) in playback view
+    if (playbackState.status !== 'playing' || view !== 'playback') {
       setControlsVisible(true)
       return
     }
@@ -143,10 +232,27 @@ function App() {
       window.removeEventListener('pointermove', resetTimer)
       window.removeEventListener('touchstart', resetTimer)
     }
-  }, [playbackState.status])
+  }, [playbackState.status, view])
 
-  // Playback view: status is 'playing' or 'paused'
-  if (playbackState.status === 'playing' || playbackState.status === 'paused') {
+  // Auto-end convergence (discretion #4): engine natural exhaustion fires
+  // onEnded → status idle → converge the view to selection (no stuck black
+  // screen) and retire the D-03 marker. Away-from-playback auto-end no-ops
+  // through the view guard (marker already retired by the leave path;
+  // exitPlaybackHistory is marker-guarded, so any redundant call is safe).
+  // Ordering: setView is queued BEFORE exitPlaybackHistory's back()
+  // dispatches popstate (separate task per HTML spec), so the popstate
+  // guard observes viewRef.current === 'selection' and no-ops; even in a
+  // pathological race leavePlayback is idempotent (worst case: duplicate
+  // kept-session toast).
+  useEffect(() => {
+    if (view === 'playback' && playbackState.status === 'idle') {
+      setView('selection')
+      exitPlaybackHistory(window.history)
+    }
+  }, [playbackState.status, view])
+
+  // Playback view: decoupled from status — rendering branches on view only.
+  if (view === 'playback' && subtitle) {
     return (
       <div className="app">
         <RotateOverlay />
@@ -161,6 +267,7 @@ function App() {
           onPlay={handlePlay}
           onPause={handlePause}
           onStop={handleStop}
+          onBack={handleBackControl}
           fontSize={settings.fontSize}
           isDimmed={settings.isDimmed}
           onFontSizeChange={(size) => updateSettings({ fontSize: size })}
@@ -182,6 +289,13 @@ function App() {
   if (!subtitle) {
     return (
       <div className="app">
+        <SessionBanner
+          session={session}
+          status={playbackState.status}
+          onResume={handlePlay}
+          onDismiss={handleStop}
+        />
+        <SessionToast trigger={lastLeftAt} />
         <button
           className="language-toggle"
           onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
@@ -223,9 +337,16 @@ function App() {
   // Ready view: subtitle loaded, playback idle
   return (
     <div className="app">
+      <SessionBanner
+        session={session}
+        status={playbackState.status}
+        onResume={handlePlay}
+        onDismiss={handleStop}
+      />
+      <SessionToast trigger={lastLeftAt} />
       <button
         className="back-button"
-        onClick={() => { setSubtitle(null); setError(null) }}
+        onClick={handleDeselectMovie}
         aria-label={t('back')}
       >
         ‹ {t('back')}
