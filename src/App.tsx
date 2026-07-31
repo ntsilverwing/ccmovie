@@ -118,11 +118,9 @@ function App() {
   }, [handleImport])
 
   // Wake Lock wrappers — must be called inside user gesture chain (click handler)
-  // enableWakeLock() is awaited so the indicator reflects reality before the view
-  // switches — the NoSleep Promise resolves and sets enabled=true before
-  // setView('playback') triggers sync().
-  const handlePlay = useCallback(async () => {
-    await enableWakeLock()
+  // enableWakeLock() is called without await to preserve the user gesture context
+  const handlePlay = useCallback(() => {
+    enableWakeLock() // synchronous call within gesture chain — satisfies iOS requirement
     // Request fullscreen within user gesture to satisfy browser security
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen?.().catch(() => {
