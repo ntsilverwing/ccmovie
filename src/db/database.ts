@@ -1,11 +1,13 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
 import type { Cue } from '../types/subtitle'
+import type { PlaybackSession } from '../playback/session'
 
 /**
  * Typed IndexedDB schema for CinemaSyncSubs.
  *
- * Single `subtitles` store — settings remain in localStorage (Phase 2 decision:
- * synchronous, sufficient for 2 key-values).
+ * Two stores — `subtitles` (v1) and `session` (v2, single-record keyval for
+ * the Phase-6 playback-session anchor). Settings remain in localStorage
+ * (Phase 2 decision: synchronous, sufficient for 2 key-values).
  */
 export interface CinemaSyncDB extends DBSchema {
   subtitles: {
@@ -18,6 +20,11 @@ export interface CinemaSyncDB extends DBSchema {
       /** index for importedAt ordering (newest-first) */
       'by-importedAt': number
     }
+  }
+  session: {
+    /** fixed key 'current' — single-session record, replacement semantics */
+    key: string
+    value: PlaybackSession
   }
 }
 
@@ -47,16 +54,24 @@ let dbPromise: Promise<IDBPDatabase<CinemaSyncDB>> | null = null
 /**
  * Get the singleton database instance.
  *
- * Creates the `subtitles` store with keyPath 'id' and both indexes on first call.
- * Subsequent calls return the cached promise.
+ * Schema upgrades run through an `oldVersion < N` ladder (RESEARCH Pitfall
+ * 10): each rung guards its own additions so a v1 install keeps every
+ * subtitle record while gaining the v2 `session` store, and a fresh install
+ * runs both rungs. Subsequent calls return the cached promise.
  */
 export function getDB(): Promise<IDBPDatabase<CinemaSyncDB>> {
   if (!dbPromise) {
-    dbPromise = openDB<CinemaSyncDB>('cinemasyncsubs', 1, {
-      upgrade(db) {
-        const subStore = db.createObjectStore('subtitles', { keyPath: 'id' })
-        subStore.createIndex('by-fileName', 'fileName')
-        subStore.createIndex('by-importedAt', 'importedAt')
+    dbPromise = openDB<CinemaSyncDB>('cinemasyncsubs', 2, {
+      upgrade(db, oldVersion) {
+        if (oldVersion < 1) {
+          const subStore = db.createObjectStore('subtitles', { keyPath: 'id' })
+          subStore.createIndex('by-fileName', 'fileName')
+          subStore.createIndex('by-importedAt', 'importedAt')
+        }
+        if (oldVersion < 2) {
+          // single-record session store: out-of-line key SESSION_KEY ('current')
+          db.createObjectStore('session')
+        }
       },
     })
   }
