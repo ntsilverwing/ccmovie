@@ -427,32 +427,40 @@ it('v1→v2 upgrade preserves subtitles and adds session store', async () => {
 
 **No LOW-confidence claims affect architecture.** All library behavior claims are Context7/npm-verified; all WebKit behavior claims are webkit.org-cited.
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+All six questions were resolved at planning time (2026-08-01); one-line resolutions are appended to each entry.
 
 1. **Exact expiry threshold** (roadmap says finalize during planning; default 6h)
    - What we know: default ~6h mandated; anchor + load-time check recommended here.
    - What's unclear: the final constant (6h exactly? 8h?).
    - Recommendation: ship `SESSION_EXPIRY_MS = 6 * 3_600_000` as a single exported constant so planning can tune it in one line; unit tests cover boundary at exactly-at-threshold.
+   - **Resolution (2026-08-01):** 6h exactly, via PA-1 — SESSION_EXPIRY_MS = 6 * 3_600_000 exported from src/playback/session.ts, planner-locked in 06-01 Task 1 with exactly-at-threshold boundary tests.
 
 2. **ResumeCard: sibling component vs. SessionBanner extension**
    - What we know: D-07 demands same position/base; banner is hook-coupled and nulls on idle.
    - What's unclear: whether planner extracts shared presentational markup or duplicates the small JSX.
    - Recommendation: sibling `ResumeCard.tsx` reusing `.session-banner*` classes and i18n keys — lowest coupling, preserves the Phase-5-tested banner untouched.
+   - **Resolution (2026-08-01):** sibling ResumeCard — new src/components/ResumeCard.tsx reusing the `.session-banner*` classes verbatim; SessionBanner untouched (06-03 Task 1).
 
 3. **Paused persisted session: resume playing vs. resume paused**
    - What we know: `resumeSession` unfreeze is no-jump and tested; engine play+seek handles both.
    - What's unclear: whether "一键续播" from a paused-at-kill session should land playing or paused.
    - Recommendation: land PLAYING (cinema context: relaunch intent is to continue watching); the user can pause immediately. Planner/discuss may override.
+   - **Resolution (2026-08-01):** land PLAYING — restoreSession unfreezes paused records then plays (06-02 Task 2); paused-at-kill cards resume into playback from the frozen value.
 
 4. **Persist-effect placement: inside the hook vs. App-level**
    - Recommendation: inside `usePlaybackEngine` (co-located with the state it mirrors; App stays orchestration-only) — **with the Pitfall-11 amendment**: the effect must not delete on null (deletes are explicit at `stop()`/`onEnded` sites), or the boot hydration race makes relaunch-card criterion 2 fail deterministically. File placement of `isSessionExpired`/`isValidSession`: `src/playback/session.ts` keeps purity tests co-located with 26 existing session tests.
+   - **Resolution (2026-08-01):** inside `usePlaybackEngine` as a guarded hook effect with `hasPersistedRef` — write-only on non-null session; a delete fires only when this hook instance previously persisted, so the mount state never deletes (06-02 Task 2, recorded as PA-4).
 
 5. **On restore, push `session.offsetMs` into settings?**
    - What we know: settings.offsetMs (localStorage) and session.offsetMs share one write path in-app, so they cannot diverge today; but the hook's offset effect would overwrite the engine from settings post-restore.
    - Recommendation: on restore, `updateSettings({ offsetMs: session.offsetMs })` to guarantee four-way agreement (engine/session/banner/controls). One line, kills the divergence class.
+   - **Resolution (2026-08-01):** yes — offset pushed via `updateSettings({ offsetMs: record.offsetMs })` on restore (06-03 Task 2 resume handler).
 
 6. **Re-read persisted session on `visibilitychange` → visible (multi-tab hygiene)?**
    - Recommendation: skip unless planner wants it — out of FILE-03 scope; note in plan risks.
+   - **Resolution (2026-08-01):** skipped per recommendation — no `visibilitychange` re-read this phase; multi-tab hygiene stays out of FILE-03 scope.
 
 ## Environment Availability
 
