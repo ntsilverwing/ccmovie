@@ -5,15 +5,15 @@ milestone_name: Session Resilience
 current_phase: 06
 current_phase_name: Session Persistence & Resume
 status: executing
-stopped_at: Phase 6 UI-SPEC approved
-last_updated: "2026-08-01T18:49:15.511Z"
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-08-01T22:19:20.070Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 06 execution started
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 7
-  completed_plans: 4
+  completed_plans: 5
   percent: 50
 ---
 
@@ -29,14 +29,14 @@ See: .planning/PROJECT.md (updated 2026-07-30)
 
 **Version:** v1.1 — Session Resilience
 **Goal:** 播放会话基于真实时间轴持久化——返回不误丢、杀进程可续播
-**Status:** Executing Phase 06
+**Status:** Ready to execute
 **Started:** 2026-07-30
 
 ## Current Position
 
 Phase: 06 (Session Persistence & Resume) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 06
+Plan: 2 of 3
+Status: Ready to execute
 Last activity: 2026-08-01 — Phase 06 execution started
 
 Progress (v1.1): [████████░░] 50%
@@ -53,6 +53,7 @@ Progress (v1.1): [████████░░] 50%
 | Phase 05 P02 | 2 min | 2 tasks | 2 files |
 | Phase 05 P03 | 2 min | 3 tasks | 5 files |
 | Phase 05 P04 | 42 min | 3 tasks | 10 files |
+| Phase 06 P01 | 3h 28m | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -72,6 +73,9 @@ Recent decisions affecting current work (full log: PROJECT.md Key Decisions):
 - [Phase 05-lossless-playback-navigation]: resumePlayingAria split from resumePlaying — one key cannot hold both Resume and Resume {fileName}; planner-documented deviation accepted, both keys present in en+zh — Type-lock arity of t() interpolation keys
 - [Phase 05-lossless-playback-navigation]: Adopted uncommitted partial work from interrupted prior executor run; verified against plan+UI-SPEC, split CSS by hunk into per-task atomic commits — Orchestrator-approved takeover; no content changes needed after review
 - [Phase ?]: 05-04 checkpoint user override: back control ‹ 返回 placement moved from UI-SPEC/D-09 first-child to AFTER the 全屏 fullscreen toggle (UI-SPEC historical doc intentionally left unchanged)
+- [Phase 06-session-persistence-resume]: SESSION_EXPIRY_MS locked at 6 * 3_600_000 (6h), anchored on startedAt with strictly-greater comparison — Covers any theatrical screening plus previews with margin; a rolling updatedAt anchor adds record complexity with zero behavioral change (writes occur only on transitions). Resolves the STATE.md expiry-threshold blocker.
+- [Phase 06-session-persistence-resume]: sessions.ts adopts swallow-warn never-throw policy, consciously splitting from subtitles.ts wrapped-rethrow convention — The playback path must never crash on persistence failure; subtitle management is user-initiated and surfaces errors. Swallow-warn is RESEARCH-locked and documented in module JSDoc.
+- [Phase 06-session-persistence-resume]: loadSession treats an empty session store as null without issuing any write or delete; only structurally-invalid records trigger the unawaited best-effort clear — The boot-time initial-mount empty state must stay mutation-free; clear-on-invalid is the only sanctioned auto-delete in the load path (06-03 boot-flow wiring contract).
 
 ### Pending Todos
 
@@ -98,9 +102,9 @@ Items acknowledged and carried forward from v1.0 close (2026-07-29):
 
 ## Session Continuity
 
-Last session: 2026-08-01T18:09:49.371Z
-Stopped at: Phase 6 UI-SPEC approved
-Resume file: .planning/phases/06-session-persistence-resume/06-UI-SPEC.md
+Last session: 2026-08-01T22:19:14.706Z
+Stopped at: Completed 06-01-PLAN.md
+Resume file: None
 
 ---
 

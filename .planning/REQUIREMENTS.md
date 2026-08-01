@@ -19,7 +19,7 @@ Current milestone scope. Both rest on the same mechanism: a wall-clock-based pla
 
 ### File Management
 
-- [ ] **FILE-03**: Playback session persists across app kill/refresh; user resumes from the correct position
+- [x] **FILE-03**: Playback session persists across app kill/refresh; user resumes from the correct position
   - 会话（字幕 ID、startedAt、偏移）持久化到 IndexedDB；偏移调整即时写入
   - 应用被误杀/刷新后重启：选择页顶部显示续播卡片（片名 + 已播时长），一键从正确位置续播
   - 续播卡片可手动关闭 = 放弃会话；超时自动作废（阈值在规划时定义，默认 ~6 小时）
@@ -98,7 +98,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PWA-02 | Phase 3 (v1.0) | Complete |
 | PWA-03 | Phase 3 (v1.0) | Complete |
 | PLAY-08 | Phase 5 (v1.1) | Complete |
-| FILE-03 | Phase 6 (v1.1) | Pending |
+| FILE-03 | Phase 6 (v1.1) | Complete |
 
 **Coverage:**
 
