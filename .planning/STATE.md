@@ -5,8 +5,8 @@ milestone_name: Session Resilience
 current_phase: 06
 current_phase_name: Session Persistence & Resume
 status: executing
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-08-01T22:19:20.070Z"
+stopped_at: Completed 06-02-PLAN.md
+last_updated: "2026-08-01T22:26:18.198Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 06 execution started
 progress:
@@ -35,7 +35,7 @@ See: .planning/PROJECT.md (updated 2026-07-30)
 ## Current Position
 
 Phase: 06 (Session Persistence & Resume) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-08-01 — Phase 06 execution started
 
@@ -54,6 +54,7 @@ Progress (v1.1): [████████░░] 50%
 | Phase 05 P03 | 2 min | 3 tasks | 5 files |
 | Phase 05 P04 | 42 min | 3 tasks | 10 files |
 | Phase 06 P01 | 3h 28m | 2 tasks | 7 files |
+| Phase 06 P02 | 3 min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,8 @@ Recent decisions affecting current work (full log: PROJECT.md Key Decisions):
 - [Phase 06-session-persistence-resume]: SESSION_EXPIRY_MS locked at 6 * 3_600_000 (6h), anchored on startedAt with strictly-greater comparison — Covers any theatrical screening plus previews with margin; a rolling updatedAt anchor adds record complexity with zero behavioral change (writes occur only on transitions). Resolves the STATE.md expiry-threshold blocker.
 - [Phase 06-session-persistence-resume]: sessions.ts adopts swallow-warn never-throw policy, consciously splitting from subtitles.ts wrapped-rethrow convention — The playback path must never crash on persistence failure; subtitle management is user-initiated and surfaces errors. Swallow-warn is RESEARCH-locked and documented in module JSDoc.
 - [Phase 06-session-persistence-resume]: loadSession treats an empty session store as null without issuing any write or delete; only structurally-invalid records trigger the unawaited best-effort clear — The boot-time initial-mount empty state must stay mutation-free; clear-on-invalid is the only sanctioned auto-delete in the load path (06-03 boot-flow wiring contract).
+- [Phase ?]: restoreSession ordering locked as setCues → play() → seekTo(sessionElapsedMs(live, now)); paused records unfreeze via resumeSession before play (no-jump); does NOT route through resyncToSession (its statusRef guard no-ops in the fresh-launch gesture batch) — play() re-derives startTime on a fresh engine and would clobber a pre-play seek anchor — the seek-before-play ordering provably restarts at 0:00:00. Contract tests in playbackEngine.test.ts lock both orderings so a future reorder fails loudly.
+- [Phase ?]: Persist effect adopts PA-4's effect-driven deletion gated by hasPersistedRef, consciously deviating from RESEARCH Pattern 2's explicit deletes at stop()/onEnded sites — The hasPersistedRef flag kills the identical Pitfall-11 delete-before-hydrate race (mount fires no delete because the flag starts false) without cross-component ref wiring and without touching stop()/onEnded bodies; hook-local and StrictMode-idempotent.
 
 ### Pending Todos
 
@@ -102,8 +105,8 @@ Items acknowledged and carried forward from v1.0 close (2026-07-29):
 
 ## Session Continuity
 
-Last session: 2026-08-01T22:19:14.706Z
-Stopped at: Completed 06-01-PLAN.md
+Last session: 2026-08-01T22:26:18.188Z
+Stopped at: Completed 06-02-PLAN.md
 Resume file: None
 
 ---
