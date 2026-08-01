@@ -4,17 +4,17 @@ milestone: v1.1
 milestone_name: Session Resilience
 current_phase: 06
 current_phase_name: Session Persistence & Resume
-status: executing
-stopped_at: Completed 06-02-PLAN.md
-last_updated: "2026-08-01T22:26:18.198Z"
+status: verifying
+stopped_at: Completed 06-03-PLAN.md (phase 06 ready for verification; device checkpoint carried to 06-UAT.md)
+last_updated: "2026-08-01T22:34:08.129Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 06 execution started
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 7
-  completed_plans: 5
-  percent: 50
+  completed_plans: 7
+  percent: 100
 ---
 
 # State: CinemaSyncSubs
@@ -29,22 +29,22 @@ See: .planning/PROJECT.md (updated 2026-07-30)
 
 **Version:** v1.1 — Session Resilience
 **Goal:** 播放会话基于真实时间轴持久化——返回不误丢、杀进程可续播
-**Status:** Ready to execute
+**Status:** Phase complete — ready for verification
 **Started:** 2026-07-30
 
 ## Current Position
 
-Phase: 06 (Session Persistence & Resume) — EXECUTING
+Phase: 06 (Session Persistence & Resume) — READY FOR VERIFICATION
 Plan: 3 of 3
-Status: Ready to execute
-Last activity: 2026-08-01 — Phase 06 execution started
+Status: Phase complete — ready for verification
+Last activity: 2026-08-01 — Phase 06 execution complete (06-03 device checkpoint carried to 06-UAT.md, human_needed)
 
-Progress (v1.1): [████████░░] 50%
+Progress (v1.1): [██████████] 100%
 
 ## Performance Metrics
 
 **v1.0 final:** 4 phases, 11 plans, 25 tasks — shipped 2026-07-29 (3-day cycle, 62 files, +9,427 LOC)
-**v1.1:** 1 phase, 4 plans complete
+**v1.1:** 2 phases, 7 plans complete
 **Per-Plan Metrics:**
 
 | Plan | Duration | Tasks | Files |
@@ -55,6 +55,7 @@ Progress (v1.1): [████████░░] 50%
 | Phase 05 P04 | 42 min | 3 tasks | 10 files |
 | Phase 06 P01 | 3h 28m | 2 tasks | 7 files |
 | Phase 06 P02 | 3 min | 2 tasks | 2 files |
+| Phase 06 P03 | 3 min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -79,6 +80,8 @@ Recent decisions affecting current work (full log: PROJECT.md Key Decisions):
 - [Phase 06-session-persistence-resume]: loadSession treats an empty session store as null without issuing any write or delete; only structurally-invalid records trigger the unawaited best-effort clear — The boot-time initial-mount empty state must stay mutation-free; clear-on-invalid is the only sanctioned auto-delete in the load path (06-03 boot-flow wiring contract).
 - [Phase ?]: restoreSession ordering locked as setCues → play() → seekTo(sessionElapsedMs(live, now)); paused records unfreeze via resumeSession before play (no-jump); does NOT route through resyncToSession (its statusRef guard no-ops in the fresh-launch gesture batch) — play() re-derives startTime on a fresh engine and would clobber a pre-play seek anchor — the seek-before-play ordering provably restarts at 0:00:00. Contract tests in playbackEngine.test.ts lock both orderings so a future reorder fails loudly.
 - [Phase ?]: Persist effect adopts PA-4's effect-driven deletion gated by hasPersistedRef, consciously deviating from RESEARCH Pattern 2's explicit deletes at stop()/onEnded sites — The hasPersistedRef flag kills the identical Pitfall-11 delete-before-hydrate race (mount fires no delete because the flag starts false) without cross-component ref wiring and without touching stop()/onEnded bodies; hook-local and StrictMode-idempotent.
+- [Phase ?]: ResumeCard is a SessionBanner SIBLING reusing .session-banner* markup verbatim (D-07) — zero new CSS/i18n keys; index.css banner rules unchanged (7), translations.ts untouched — PA-2 executed
+- [Phase ?]: Session expiry evaluated exactly once per app launch in the boot mount effect; tap-time re-check rejected (orphaned card converges via onEnded) — PA-7 executed; 06-03 Task 3 device checkpoint auto-approved under --chain and carried to 06-UAT.md as human_needed
 
 ### Pending Todos
 
@@ -105,8 +108,8 @@ Items acknowledged and carried forward from v1.0 close (2026-07-29):
 
 ## Session Continuity
 
-Last session: 2026-08-01T22:26:18.188Z
-Stopped at: Completed 06-02-PLAN.md
+Last session: 2026-08-01T22:33:54.109Z
+Stopped at: Completed 06-03-PLAN.md (phase 06 ready for verification; device checkpoint carried to 06-UAT.md)
 Resume file: None
 
 ---
