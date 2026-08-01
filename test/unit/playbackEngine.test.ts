@@ -144,3 +144,91 @@ describe('PlaybackEngine onEnded / seekTo', () => {
     expect(rafQueue.length).toBe(0)
   })
 })
+
+describe('PlaybackEngine restore ordering contract (Phase 6, FILE-03)', () => {
+  // Same harness as the onEnded/seekTo block above: stub rAF so engine
+  // ticks run synchronously under test control, and stub performance.now
+  // so elapsed advances deterministically. No new mocking approach.
+  let fakeNow: number
+  let rafQueue: Array<(t: number) => void>
+
+  /** Run every queued rAF callback once (each tick re-queues itself if playing). */
+  function runFrame(): void {
+    const pending = rafQueue
+    rafQueue = []
+    for (const cb of pending) cb(fakeNow)
+  }
+
+  /** Advance the fake clock by `ms` then run one frame. */
+  function advance(ms: number): void {
+    fakeNow += ms
+    runFrame()
+  }
+
+  beforeEach(() => {
+    fakeNow = 1000
+    rafQueue = []
+    vi.stubGlobal('requestAnimationFrame', (cb: (t: number) => void) => {
+      rafQueue.push(cb)
+      return rafQueue.length
+    })
+    vi.stubGlobal('cancelAnimationFrame', () => {})
+    vi.spyOn(performance, 'now').mockImplementation(() => fakeNow)
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+  })
+
+  it('fresh-engine restore anchors at the recorded position (setCues → play() → seekTo)', () => {
+    // Restore path on a fresh (post-relaunch) engine: the hook constructs the
+    // engine with no cues, then restoreSession primes it imperatively.
+    const seen: number[] = []
+    const onEnded = vi.fn()
+    const engine = new PlaybackEngine([], (i) => seen.push(i), onEnded)
+    engine.setCues(CUES) // imperative prime — must land BEFORE play()
+    engine.play() // synchronous first tick: elapsed 0 → cue 0
+    engine.seekTo(1500) // offset-inclusive elapsed, inside cue 1 [1000,2000)
+    runFrame()
+    // The anchor survives: onCueChange surfaces the cue covering the
+    // recorded position on the next frame.
+    expect(seen[seen.length - 1]).toBe(1)
+    expect(onEnded).not.toHaveBeenCalled()
+  })
+
+  it('contract lock: seek BEFORE play() is clobbered to position 0 on a fresh engine', () => {
+    // Documents WHY restoreSession seeks after play(): on a fresh engine
+    // play() re-derives startTime = performance.now() - pausedElapsed
+    // (pausedElapsed = 0), discarding any anchor a seek set earlier. This is
+    // a characterization lock, not desired end behavior — a future refactor
+    // that reorders restoreSession to seek-before-play flips the expectation
+    // and fails loudly here.
+    const seen: number[] = []
+    const engine = new PlaybackEngine([], (i) => seen.push(i), vi.fn())
+    engine.setCues(CUES)
+    engine.seekTo(1500) // the doomed order: anchor set before play()
+    engine.play() // play() overwrites startTime from pausedElapsed (= 0)
+    runFrame()
+    expect(seen[seen.length - 1]).toBe(0) // ticks from position 0 — recorded 1500 lost
+  })
+
+  it('no spurious onEnded when a near-exhausted engine is stopped and restored', () => {
+    const seen: number[] = []
+    const onEnded = vi.fn()
+    const engine = new PlaybackEngine(CUES, (i) => seen.push(i), onEnded)
+    engine.play()
+    advance(5900) // elapsed 5900 — inside final cue [5000,6000), 1s from exhaustion
+    expect(seen[seen.length - 1]).toBe(3)
+    engine.stop() // explicit stop — existing contract: never fires onEnded
+    expect(onEnded).not.toHaveBeenCalled()
+    // Restore batch (restoreSession's engine-side sequence):
+    engine.setCues(CUES)
+    engine.play()
+    engine.seekTo(1500) // mid-movie anchor
+    runFrame()
+    runFrame()
+    expect(onEnded).not.toHaveBeenCalled()
+    expect(seen[seen.length - 1]).toBe(1) // restored position surfaced, loop continues
+  })
+})
