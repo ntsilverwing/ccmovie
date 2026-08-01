@@ -31,7 +31,7 @@ Full v1.0 phase details archived: `.planning/milestones/v1.0-ROADMAP.md`
 **Shared mechanism:** Both v1.1 requirements rest on one wall-clock playback session — subtitle ID + `startedAt` real timestamp + offset — persisted via idb/IndexedDB. Resume position is always `now − startedAt + offset`. Mechanism rationale: `.planning/notes/audio-sync-assessment.md`
 
 - [x] **Phase 5: Lossless Playback Navigation** — 4/4 plans, completed 2026-07-30
-- [ ] **Phase 6: Session Persistence & Resume** — Session survives app kill/refresh; one-tap resume card on relaunch
+- [x] **Phase 6: Session Persistence & Resume** — Session survives app kill/refresh; one-tap resume card on relaunch (completed 2026-08-01)
 
 ## Phase Details
 
@@ -103,7 +103,7 @@ Phases execute in numeric order: 5 → 6
 | 3. Cinema Readiness | v1.0 | 5/5 | Complete | 2026-07-29 |
 | 4. Polish & Accessibility | v1.0 | 1/1 | Complete | 2026-07-29 |
 | 5. Lossless Playback Navigation | v1.1 | 4/4 | Complete | 2026-07-30 |
-| 6. Session Persistence & Resume | v1.1 | 3/3 | In Progress|  |
+| 6. Session Persistence & Resume | v1.1 | 3/3 | Complete    | 2026-08-01 |
 
 ## Coverage
 

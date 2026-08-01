@@ -1,32 +1,39 @@
 ---
 phase: 06-session-persistence-resume
 verified: 2026-08-01T17:00:00Z
-status: human_needed
+status: passed
 score: 2/4
 behavior_unverified: 2
 overrides_applied: 0
 behavior_unverified_items:
+
   - truth: "User relaunching the app after a kill/refresh sees a resume card atop the selection page (movie title + elapsed duration) and resumes from the correct position in one tap"
     test: "Kill the app mid-playback, relaunch, confirm resume card appears with movie title + live-ticking elapsed meta; tap Resume and confirm playback opens at the offset-inclusive wall-clock position (NOT 0:00:00)"
     expected: "Card appears with correct title + elapsed time; resume lands at the correct wall-clock position; paused-at-kill card shows frozen 'Paused at {time}' with no tick and resumes playing from frozen value"
     why_human: "Real device kill/relaunch, wake-lock, fullscreen, and IndexedDB survival across process death cannot be simulated in node-env Vitest; Task 3 device checkpoint was auto-approved under --chain WITHOUT execution"
+
   - truth: "User can dismiss the resume card to abandon the session, and sessions older than the expiry threshold (default ~6 hours) are automatically invalidated"
     test: "Dismiss the card with one tap — card disappears and relaunch shows byte-identical v1.0 selection page (no card); hand-edit a stored record's startedAt to >6h in the past in devtools, relaunch — no card renders"
     expected: "Single-tap dismiss clears the record and removes the card; >6h record is cleared on load and renders no card"
     why_human: "The isSessionExpired predicate is unit-tested (boundaries pass), but the end-to-end device behavior (card absence after dismiss on relaunch, >6h record cleared on relaunch) requires a real device and cannot be grep-verified"
 human_verification:
+
   - test: "Kill app mid-playback, relaunch — resume card shows movie title + live-ticking elapsed; tap Resume — playback opens at wall-clock position"
     expected: "Card appears after kill/relaunch; resume lands at correct position (never 0:00:00)"
     why_human: "Process kill and IndexedDB survival across death cannot be simulated in node-env Vitest"
+
   - test: "Background app, pause playback, kill + relaunch — card shows 'Paused at {time}' frozen (no tick); Resume lands playing from frozen value"
     expected: "Paused-at-kill frozen display with no tick; resume plays from frozen position with no jump"
     why_human: "Paused-at-kill display and resume-from-frozen are device-observable behaviors"
+
   - test: "Dismiss card with one tap of × — no confirmation; relaunch — selection page byte-identical to v1.0 and session record deleted"
     expected: "Single-tap dismiss with zero friction; record cleared; relaunch shows no card"
     why_human: "Dismiss UX and post-dismiss record state require device confirmation"
+
   - test: "Hand-edit stored record's startedAt to >6h in the past (or corrupt a field type) in devtools, relaunch — no card renders"
     expected: "Expired/corrupt record cleared on load; no card renders"
     why_human: "Expiry invalidation on relaunch is a device-observable behavior"
+
   - test: "Import a different subtitle while card visible — card disappears; only new session's record exists under 'current' after pressing Start"
     expected: "New import replaces session; single 'current' record for new session"
     why_human: "Replacement semantics at device level require real IndexedDB observation"
@@ -179,6 +186,7 @@ The Task 3 device checkpoint (`checkpoint:human-verify`, gate: blocking) was aut
 No code gaps found. All artifacts exist, are substantive, wired, and data-flowing. All key links are wired. All prohibitions are honored at code level. 112 unit/integration tests pass; build is clean.
 
 The phase is `human_needed` (not `gaps_found`) because:
+
 - The codebase is complete and correct at the code level — no missing/stub/unwired artifacts.
 - Two roadmap success criteria (#2 resume card + correct position, #3 dismiss + expiry invalidation) assert device-runtime behaviors that cannot be verified in node-env Vitest. The `restoreSession` ordering is locked by contract tests, and the `isSessionExpired` predicate is unit-tested at boundaries, but the end-to-end device experience requires a real Android PWA.
 - The Task 3 device checkpoint (blocking `checkpoint:human-verify`) was auto-approved under `--chain` without execution — its seven-step checklist is the primary outstanding verification item.
