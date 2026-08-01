@@ -98,6 +98,42 @@ export function updateSessionOffset(session: PlaybackSession, offsetMs: number):
   return { ...session, offsetMs }
 }
 
+/**
+ * Age threshold beyond which a persisted session is treated as abandoned
+ * (Phase 6, FILE-03 #3). Six hours covers any theatrical screening plus
+ * previews with margin, while expiring yesterday's stale records.
+ */
+export const SESSION_EXPIRY_MS = 6 * 3_600_000
+
+/**
+ * Expiry predicate evaluated ONLY at app load (RESEARCH Pattern 4): a session
+ * is expired when its age exceeds expiryMs. Strictly-greater comparison —
+ * exactly-at-threshold is still valid. Negative age (clock skew, now <
+ * startedAt) can never be expired; the display layer clamps via
+ * formatElapsedHMS.
+ */
+export function isSessionExpired(session: PlaybackSession, now: number, expiryMs: number): boolean {
+  return now - session.startedAt > expiryMs
+}
+
+/**
+ * Shape-validates an untrusted record read from IndexedDB (RESEARCH Pattern
+ * 5, loadSettings spirit): every field checked per-field, reject — never
+ * clamp, never throw. IndexedDB content is user-editable via devtools and
+ * partial writes are possible after abrupt kills, so any malformed record is
+ * treated as absent by callers.
+ */
+export function isValidSession(raw: unknown): raw is PlaybackSession {
+  if (raw === null || typeof raw !== 'object') return false
+  const s = raw as Record<string, unknown>
+  if (typeof s.subtitleId !== 'string') return false
+  if (typeof s.fileName !== 'string') return false
+  if (!Number.isFinite(s.startedAt)) return false
+  if (!Number.isFinite(s.offsetMs)) return false
+  if (s.pausedElapsedMs !== null && !Number.isFinite(s.pausedElapsedMs)) return false
+  return true
+}
+
 /** Zero-pad to two digits. */
 function pad2(n: number): string {
   return n < 10 ? `0${n}` : String(n)
