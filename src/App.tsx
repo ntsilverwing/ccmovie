@@ -4,6 +4,7 @@ import { CuePreview } from './components/CuePreview'
 import { SubtitleDisplay } from './components/SubtitleDisplay'
 import { PlaybackControls } from './components/PlaybackControls'
 import { SessionBanner } from './components/SessionBanner'
+import { ResumeCard } from './components/ResumeCard'
 import { SessionToast } from './components/SessionToast'
 import { usePlaybackEngine } from './hooks/usePlaybackEngine'
 import { usePersistedSettings } from './hooks/usePersistedSettings'
@@ -14,7 +15,10 @@ import { enterPlaybackHistory, exitPlaybackHistory, isPlaybackEntry } from './pl
 import type { ParsedSubtitle } from './types/subtitle'
 import type { ImportError } from './utils/errors'
 import type { StoredSubtitle } from './db/database'
-import { getAllSubtitles, deleteSubtitle } from './db/subtitles'
+import { getAllSubtitles, getSubtitle, deleteSubtitle } from './db/subtitles'
+import { loadSession, clearSessionRecord } from './db/sessions'
+import type { PlaybackSession } from './playback/session'
+import { SESSION_EXPIRY_MS, isSessionExpired } from './playback/session'
 
 function App() {
   const [subtitle, setSubtitle] = useState<ParsedSubtitle | null>(null)
@@ -45,7 +49,7 @@ function App() {
       }
     : null
 
-  const { state: playbackState, play, pause, stop, session, resyncToSession } = usePlaybackEngine(
+  const { state: playbackState, play, pause, stop, session, resyncToSession, restoreSession } = usePlaybackEngine(
     subtitle?.cues ?? [],
     settings.offsetMs,
     activeIdentity
@@ -70,6 +74,28 @@ function App() {
       })
   }, [])
 
+  // Hydrate the persisted playback session on mount (FILE-03, I-1). Expiry
+  // is evaluated EXACTLY ONCE per app launch here — never from a timer,
+  // interval, or visibilitychange re-check. Expired records are cleared and
+  // the selection page renders byte-identical to v1.0; valid records drive
+  // the ResumeCard (the IndexedDB read is sub-100ms, so no spinner — the
+  // card simply appears on resolve).
+  const [persistedSession, setPersistedSession] = useState<PlaybackSession | null>(null)
+  useEffect(() => {
+    loadSession()
+      .then((record) => {
+        if (!record) return
+        if (isSessionExpired(record, Date.now(), SESSION_EXPIRY_MS)) {
+          void clearSessionRecord()
+          return
+        }
+        setPersistedSession(record)
+      })
+      .catch((err) => {
+        console.warn('Failed to load persisted session:', err)
+      })
+  }, [])
+
   const refreshSavedSubtitles = useCallback(() => {
     getAllSubtitles()
       .then(setSavedSubtitles)
@@ -81,6 +107,13 @@ function App() {
   const handleImport = (result: ParsedSubtitle) => {
     // Stop current playback when a new file is imported during playback
     stop()
+    // I-5: a new import replaces any persisted session (replacement
+    // sequence stop → clear → create → save); a restored card can never
+    // survive a new import. The stop()-triggered hook effect deletes only
+    // records THIS hook instance persisted, so the explicit clear is
+    // required post-relaunch.
+    void clearSessionRecord()
+    setPersistedSession(null)
     setSubtitle(result)
     setError(null)
     // Refresh saved list after import saves to IndexedDB
@@ -136,6 +169,69 @@ function App() {
     play()
     setView('playback')
   }, [enableWakeLock, play, resyncToSession])
+
+  // One-tap resume from the persisted-session card (FILE-03 #2, I-2/I-3).
+  // Gesture chain mirrors handlePlay: enableWakeLock() fires synchronously
+  // FIRST, before any await/.then (iOS requirement). The cue lookup runs id
+  // → fileName fallback (soft link per SessionIdentity contract; the
+  // in-memory savedSubtitles fallback is safe because the card can only
+  // render after boot mount hydration has settled). On total miss the
+  // record is cleared and the card removed silently — no toast, no dialog,
+  // and NO fullscreen/history calls (the D-01 marker belongs ONLY to the
+  // hit path: a playback marker pushed with no playback view breaks D-03
+  // natural-exit; a fullscreened selection page is a dark-theater failure).
+  const handleResumeFromSession = useCallback(() => {
+    const record = persistedSession
+    if (!record) return
+    enableWakeLock() // synchronous call within gesture chain — satisfies iOS requirement
+    getSubtitle(record.subtitleId)
+      .then((stored) => {
+        const hit = stored ?? savedSubtitles.find((s) => s.fileName === record.fileName)
+        if (!hit) {
+          // Dead soft-link (I-3): silent clear + card removal.
+          void clearSessionRecord()
+          setPersistedSession(null)
+          return
+        }
+        // Transient activation post-async is best-effort (RESEARCH A2);
+        // denial degrades gracefully, playback continues.
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen?.().catch(() => {})
+        }
+        // Register the playback history marker ONLY on the hit path (D-01/D-03).
+        enterPlaybackHistory(window.history)
+        // Reconstruct ParsedSubtitle exactly as handleSelectSaved does —
+        // WITHOUT routing through handleImport, whose stop() would tear
+        // down the session being restored.
+        const result: ParsedSubtitle = {
+          cues: hit.cues,
+          metadata: {
+            fileName: hit.fileName,
+            encoding: hit.encoding,
+            cueCount: hit.cueCount,
+            parsedAt: hit.importedAt,
+          },
+          errors: [],
+        }
+        setSubtitle(result)
+        restoreSession(result.cues, record)
+        setView('playback')
+        // Four-way offset agreement (PA-5): engine/session/banner/controls.
+        updateSettings({ offsetMs: record.offsetMs })
+        setPersistedSession(null)
+      })
+      .catch((err) => {
+        console.warn('Failed to resume persisted session:', err)
+      })
+  }, [persistedSession, enableWakeLock, restoreSession, savedSubtitles, updateSettings])
+
+  // Card dismiss (I-4, D-08): clear the IndexedDB record and remove the
+  // card in a single tap — no confirmation, no engine/view interaction
+  // (the engine is idle post-relaunch).
+  const handleDismissCard = useCallback(() => {
+    void clearSessionRecord()
+    setPersistedSession(null)
+  }, [])
 
   // D-04: leave playback with the double release ONLY — Wake Lock +
   // fullscreen. The engine is deliberately left untouched so the subtitle
@@ -295,12 +391,20 @@ function App() {
   if (!subtitle) {
     return (
       <div className="app">
-        <SessionBanner
-          session={session}
-          status={playbackState.status}
-          onResume={handlePlay}
-          onDismiss={handleStop}
-        />
+        {persistedSession !== null && session === null ? (
+          <ResumeCard
+            session={persistedSession}
+            onResume={handleResumeFromSession}
+            onDismiss={handleDismissCard}
+          />
+        ) : (
+          <SessionBanner
+            session={session}
+            status={playbackState.status}
+            onResume={handlePlay}
+            onDismiss={handleStop}
+          />
+        )}
         <SessionToast trigger={lastLeftAt} />
         <button
           className="language-toggle"
@@ -343,12 +447,20 @@ function App() {
   // Ready view: subtitle loaded, playback idle
   return (
     <div className="app">
-      <SessionBanner
-        session={session}
-        status={playbackState.status}
-        onResume={handlePlay}
-        onDismiss={handleStop}
-      />
+      {persistedSession !== null && session === null ? (
+        <ResumeCard
+          session={persistedSession}
+          onResume={handleResumeFromSession}
+          onDismiss={handleDismissCard}
+        />
+      ) : (
+        <SessionBanner
+          session={session}
+          status={playbackState.status}
+          onResume={handlePlay}
+          onDismiss={handleStop}
+        />
+      )}
       <SessionToast trigger={lastLeftAt} />
       <button
         className="back-button"
