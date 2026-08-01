@@ -9,6 +9,7 @@ import {
   updateSessionOffset,
   sessionElapsedMs,
 } from '../playback/session'
+import { saveSession, clearSessionRecord } from '../db/sessions'
 
 /**
  * Playback status — the three states of the playback state machine.
@@ -98,7 +99,12 @@ export interface SessionIdentity {
  * clock-free session module; every wall-clock value enters via Date.now()
  * at the call site.
  *
- * Returns { state, play, pause, stop, session, resyncToSession }.
+ * Phase 6 (FILE-03): the hook also persists the session to IndexedDB on
+ * every identity change (create/pause/resume/offset/stop — never on engine
+ * ticks), guarded so a fresh mount issues no delete, and exposes
+ * restoreSession for the one-tap resume path.
+ *
+ * Returns { state, play, pause, stop, session, resyncToSession, restoreSession }.
  */
 export function usePlaybackEngine(
   cues: Cue[],
@@ -111,6 +117,7 @@ export function usePlaybackEngine(
   stop: () => void
   session: PlaybackSession | null
   resyncToSession: () => void
+  restoreSession: (cues: Cue[], persisted: PlaybackSession) => void
 } {
   const [state, dispatch] = useReducer(playbackReducer, INITIAL_STATE)
   const [session, setSession] = useState<PlaybackSession | null>(null)
@@ -148,6 +155,28 @@ export function usePlaybackEngine(
     engineRef.current?.setOffset(offsetMs)
     setSession((prev) => (prev ? updateSessionOffset(prev, offsetMs) : prev))
   }, [offsetMs])
+
+  // Whether THIS hook instance has persisted a record (Pitfall-11 guard).
+  const hasPersistedRef = useRef(false)
+
+  // Persist-on-change (Phase 6, FILE-03 #1/#4): every setSession site
+  // allocates a fresh object or null, so identity change === semantic
+  // transition (create/pause/resume/offset/stop). Engine position ticks
+  // never touch the session object → zero write amplification against
+  // battery/quota. The hasPersistedRef gate kills the delete-before-hydrate
+  // race (RESEARCH Pitfall 11): the mount-time null session performs NO
+  // delete, so a record awaiting App's boot loadSession() can never be
+  // wiped by this effect — even under StrictMode double-invocation (the
+  // flag flips only after an actual save by this instance).
+  useEffect(() => {
+    if (session !== null) {
+      hasPersistedRef.current = true
+      void saveSession(session)
+    } else if (hasPersistedRef.current) {
+      hasPersistedRef.current = false
+      void clearSessionRecord()
+    }
+  }, [session])
 
   // Create engine instance once. The onEnded closure converges React state
   // to idle and clears the session when the engine self-stops (natural
@@ -212,5 +241,30 @@ export function usePlaybackEngine(
     engineRef.current?.seekTo(sessionElapsedMs(sessionRef.current, Date.now()))
   }, [])
 
-  return { state, play, pause, stop, session, resyncToSession }
+  /**
+   * One-tap resume of a persisted session (Phase 6, FILE-03 #2): prime the
+   * engine with the restored cues BEFORE play (Pitfall 3 — setCues via prop
+   * effect would commit one render late and the first ticks would read
+   * stale/empty cues), then play, then seek to the offset-INCLUSIVE
+   * wall-clock position (seekTo contract). The ordering setCues → play() →
+   * seekTo is locked by the restore-ordering contract tests: play()
+   * re-derives startTime on a fresh engine, so a pre-play seek is
+   * discarded. Do NOT route through resyncToSession — its statusRef guard
+   * no-ops in this fresh-launch gesture batch (status is still 'idle'
+   * pre-dispatch). Paused persisted records resume from their frozen value
+   * via resumeSession's no-jump guarantee.
+   */
+  const restoreSession = useCallback((cues: Cue[], persisted: PlaybackSession) => {
+    const engine = engineRef.current
+    if (!engine) return
+    const now = Date.now()
+    const live = resumeSession(persisted, now) // unfreeze if paused (no-jump)
+    engine.setCues(cues) // imperative — BEFORE play() (Pitfall 3)
+    dispatch({ type: 'PLAY' })
+    engine.play()
+    engine.seekTo(sessionElapsedMs(live, now)) // offset-INCLUSIVE space (seekTo JSDoc)
+    setSession(live)
+  }, [])
+
+  return { state, play, pause, stop, session, resyncToSession, restoreSession }
 }
