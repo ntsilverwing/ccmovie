@@ -66,10 +66,16 @@ Full v1.0 phase details archived: `.planning/milestones/v1.0-ROADMAP.md`
 
   1. User's active session (subtitle ID, `startedAt`, offset) is persisted to IndexedDB, with every offset adjustment written immediately
   2. User relaunching the app after a kill/refresh sees a resume card atop the selection page (movie title + elapsed duration) and resumes from the correct position in one tap
-  3. User can dismiss the resume card to abandon the session, and sessions older than the expiry threshold (default ~6 hours; exact value finalized during Phase 6 planning) are automatically invalidated
+  3. User can dismiss the resume card to abandon the session, and sessions older than the expiry threshold (6 hours, finalized during Phase 6 planning) are automatically invalidated
   4. User loading a new subtitle replaces any existing session
 
-**Plans**: TBD
+**Plans**: 3 plans
+**Plan list**:
+
+- [ ] 06-01-PLAN.md — Session persistence core: expiry/validation policy + IndexedDB session store (v2 schema, TDD)
+- [ ] 06-02-PLAN.md — Hook resume path: restoreSession ordering contract + guarded write-on-change persistence
+- [ ] 06-03-PLAN.md — ResumeCard UI + App orchestration (boot hydration, resume/dismiss chains, device UAT)
+
 **UI hint**: yes
 
 ## Backlog
@@ -97,7 +103,7 @@ Phases execute in numeric order: 5 → 6
 | 3. Cinema Readiness | v1.0 | 5/5 | Complete | 2026-07-29 |
 | 4. Polish & Accessibility | v1.0 | 1/1 | Complete | 2026-07-29 |
 | 5. Lossless Playback Navigation | v1.1 | 4/4 | Complete | 2026-07-30 |
-| 6. Session Persistence & Resume | v1.1 | 0/TBD | Not started | - |
+| 6. Session Persistence & Resume | v1.1 | 0/3 | Not started | - |
 
 ## Coverage
 
