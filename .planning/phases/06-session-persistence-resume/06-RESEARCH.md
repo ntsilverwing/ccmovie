@@ -198,8 +198,9 @@ dbPromise = openDB<CinemaSyncDB>('cinemasyncsubs', 2, {
 ```
 
 ### Pattern 2: Write-on-transition persist effect
-**What:** `useEffect(() => { session ? saveSession(session).catch(warn) : clearSession().catch(warn) }, [session])` inside `usePlaybackEngine`.
+**What:** `useEffect(() => { if (session !== null) saveSession(session).catch(warn) }, [session])` inside `usePlaybackEngine` — **write-only on non-null**. Deletes do NOT live in this effect's null branch; they are placed explicitly at the two sites that null the session (`stop()` and the `onEnded` closure) — see Pitfall 11 for why effect-driven deletion breaks relaunch.
 **Why it works:** Phase 5's convention — every session transition returns a NEW object — means effect identity-change === a semantic transition. Offset adjustments flow through `updateSessionOffset` → new object → immediate write (FILE-03 "偏移调整即时写入" satisfied structurally). Playing ticks never touch the session object → zero write amplification (no write/second).
+**Delete call-sites (exhaustive):** hook `stop()` (`setSession(null)` — covers Dismiss × via `handleStop`, deselect via `handleDeselectMovie`, and new-import replacement via `handleImport` since all route through `stop()` [VERIFIED: src/App.tsx]) and the engine `onEnded` closure (`setSession(null)` on natural exhaustion). Each calls `void clearSession().catch(warn)` adjacent to its `setSession(null)`.
 **Anti-correlation:** NEVER persist in `pagehide`/`beforeunload` — async IndexedDB transactions race process kill; the last write may be silently dropped. Write-on-change leaves at most one in-flight micro-transaction (~ms) at kill time.
 **Durability note:** single tiny record; default durability is fine. If desired, `db.transaction('session', 'readwrite', { durability: 'strict' })` forces a disk flush before completion — measurable cost on some platforms, so keep `default` unless the device checkpoint shows loss (durability levels: 'default' browser-dependent / 'strict' flush-to-disk / 'relaxed' fastest [CITED: Context7 /jakearchibald/idb _autodocs/types.md]).
 
@@ -312,6 +313,12 @@ export function isSessionExpired(session: PlaybackSession, now: number, expiryMs
 **What goes wrong:** Rewriting `upgrade` for v2 without the ladder creates duplicate `createObjectStore('subtitles')` → `ConstraintError` on fresh… actually guarded both ways; the real failure is replacing rather than laddering.
 **How to avoid:** Exactly the `oldVersion < N` ladder from the cited idb docs; never `if (oldVersion === 1)` only.
 **Warning signs:** Existing users lose saved subtitles after deploy (would be caught by the Wave-0 upgrade test with fake-indexeddb).
+
+### Pitfall 11: Boot delete-before-hydrate race wipes the record at relaunch
+**What goes wrong:** If the persist effect carries a null-branch (`session === null → clearSession()`), relaunch shows NO resume card, ever. React flushes effects in hook-call order: the hook's persist effect (registered during `usePlaybackEngine`, called early in App's render) runs **before** App's boot `loadSession()` effect, so the delete is issued first; on the shared (memoized) DB connection, requests queue FIFO — the clear commits before the boot read resolves, and the read returns undefined.
+**Why it happens:** "Null means delete" conflates boot state (`session` is null until the async read lands) with abandon semantics (null AFTER an explicit stop). The two are indistinguishable to a bare effect.
+**How to avoid (Pattern 2 as amended):** the effect is write-only on non-null session; record deletion is placed explicitly at the two code sites that null the session (`stop()`, `onEnded`). All user-level abandon paths (Dismiss, deselect, new import, natural exhaustion) already route through those two. Alternative if the planner insists on effect-driven delete: gate it behind a `hydratedRef` that the boot load flips true on resolve — strictly more shared state for the same outcome.
+**Warning signs:** Criterion-2 UAT fails deterministically ("kill app → relaunch → no card") despite a valid record having existed pre-kill.
 
 ## Code Examples
 
@@ -438,7 +445,7 @@ it('v1→v2 upgrade preserves subtitles and adds session store', async () => {
    - Recommendation: land PLAYING (cinema context: relaunch intent is to continue watching); the user can pause immediately. Planner/discuss may override.
 
 4. **Persist-effect placement: inside the hook vs. App-level**
-   - Recommendation: inside `usePlaybackEngine` (co-located with the state it mirrors; App stays orchestration-only). File placement of `isSessionExpired`/`isValidSession`: `src/playback/session.ts` keeps purity tests co-located with 26 existing session tests.
+   - Recommendation: inside `usePlaybackEngine` (co-located with the state it mirrors; App stays orchestration-only) — **with the Pitfall-11 amendment**: the effect must not delete on null (deletes are explicit at `stop()`/`onEnded` sites), or the boot hydration race makes relaunch-card criterion 2 fail deterministically. File placement of `isSessionExpired`/`isValidSession`: `src/playback/session.ts` keeps purity tests co-located with 26 existing session tests.
 
 5. **On restore, push `session.offsetMs` into settings?**
    - What we know: settings.offsetMs (localStorage) and session.offsetMs share one write path in-app, so they cannot diverge today; but the hook's offset effect would overwrite the engine from settings post-restore.
@@ -490,7 +497,7 @@ it('v1→v2 upgrade preserves subtitles and adds session store', async () => {
 - **Phase gate:** Full suite green + build green before `/gsd-verify-work`; human device checkpoint for kill/relaunch UX.
 
 ### Wave 0 Gaps
-- [ ] `test/unit/sessions.test.ts` — store CRUD, upgrade ladder, expiry-clear-on-load, replacement sequence (FILE-03 #1/#3/#4)
+- [ ] `test/unit/sessions.test.ts` — store CRUD, upgrade ladder, expiry-clear-on-load, replacement sequence, **Pitfall-11 regression: a null-session mount must NOT clear a seeded record** (FILE-03 #1/#3/#4)
 - [ ] Extend `test/unit/session.test.ts` — `isSessionExpired` boundaries, `isValidSession` rejection table (FILE-03 #3)
 - [ ] Extend `test/unit/playbackEngine.test.ts` — restore ordering contract (play→seekTo sequence observable via injected callbacks)
 - [ ] `npm install --save-dev fake-indexeddb@^6.2.5` — Wave 0 install (legitimacy: OK)
