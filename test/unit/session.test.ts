@@ -6,7 +6,11 @@ import {
   updateSessionOffset,
   sessionElapsedMs,
   formatElapsedHMS,
+  SESSION_EXPIRY_MS,
+  isSessionExpired,
+  isValidSession,
 } from '../../src/playback/session'
+import type { PlaybackSession } from '../../src/playback/session'
 
 // Wall-clock anchor for every fixture — small integer, injected explicitly.
 // Never Date.now(), never fake timers: the module under test reads no clock.
@@ -158,6 +162,57 @@ describe('session timing model', () => {
 
     it.each(cases)('%s ms → "%s"', (ms, expected) => {
       expect(formatElapsedHMS(ms)).toBe(expected)
+    })
+  })
+
+  describe('SESSION_EXPIRY_MS', () => {
+    it('is 6 hours in milliseconds (6 * 3_600_000 = 21_600_000)', () => {
+      expect(SESSION_EXPIRY_MS).toBe(21_600_000)
+    })
+  })
+
+  describe('isSessionExpired', () => {
+    it('returns false when age == expiryMs exactly (strictly-greater: at-threshold is still valid)', () => {
+      const s = createSession({ ...BASE, now: T })
+      expect(isSessionExpired(s, T + 21_600_000, 21_600_000)).toBe(false)
+    })
+
+    it('returns true when age == expiryMs + 1', () => {
+      const s = createSession({ ...BASE, now: T })
+      expect(isSessionExpired(s, T + 21_600_001, 21_600_000)).toBe(true)
+    })
+
+    it('returns false on negative age (clock skew: now < startedAt, never expired)', () => {
+      const s = createSession({ ...BASE, now: T })
+      expect(isSessionExpired(s, T - 1, 21_600_000)).toBe(false)
+    })
+  })
+
+  describe('isValidSession', () => {
+    it('accepts a well-formed session with pausedElapsedMs === null (playing)', () => {
+      const s: PlaybackSession = { ...BASE, startedAt: T, pausedElapsedMs: null }
+      expect(isValidSession(s)).toBe(true)
+    })
+
+    it('accepts a well-formed session with a numeric pausedElapsedMs (paused)', () => {
+      const s: PlaybackSession = { ...BASE, startedAt: T, pausedElapsedMs: 60_000 }
+      expect(isValidSession(s)).toBe(true)
+    })
+
+    const invalid: Array<[string, unknown]> = [
+      ['missing subtitleId', { fileName: 'movie.srt', startedAt: T, offsetMs: 0, pausedElapsedMs: null }],
+      ['non-string fileName', { subtitleId: 'sub-42', fileName: 42, startedAt: T, offsetMs: 0, pausedElapsedMs: null }],
+      ['startedAt NaN', { subtitleId: 'sub-42', fileName: 'movie.srt', startedAt: NaN, offsetMs: 0, pausedElapsedMs: null }],
+      ['startedAt Infinity', { subtitleId: 'sub-42', fileName: 'movie.srt', startedAt: Infinity, offsetMs: 0, pausedElapsedMs: null }],
+      ['non-number offsetMs', { subtitleId: 'sub-42', fileName: 'movie.srt', startedAt: T, offsetMs: '0', pausedElapsedMs: null }],
+      ['pausedElapsedMs of wrong type', { subtitleId: 'sub-42', fileName: 'movie.srt', startedAt: T, offsetMs: 0, pausedElapsedMs: '60000' }],
+      ['null input', null],
+      ['undefined input', undefined],
+      ['string input', 'not a session'],
+    ]
+
+    it.each(invalid)('rejects %s without throwing', (_label, raw) => {
+      expect(isValidSession(raw)).toBe(false)
     })
   })
 })
