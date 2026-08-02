@@ -1,14 +1,14 @@
 ---
-status: partial
+status: complete
 phase: 05-lossless-playback-navigation
 source: [05-01-SUMMARY.md, 05-02-SUMMARY.md, 05-03-SUMMARY.md, 05-04-SUMMARY.md]
 started: 2026-07-31T05:00:00Z
-updated: 2026-07-31T06:00:00Z
+updated: 2026-08-01T23:55:00Z
 ---
 
 ## Current Test
 
-[testing paused — 3 items outstanding (blocked, require physical device)]
+[testing complete]
 
 ## Tests
 
@@ -39,22 +39,19 @@ result: pass
 
 ### 7. Android system back returns to selection (PWA required)
 expected: On an installed Android PWA during playback, pressing the Android system back gesture/book returns to the selection page (the app does NOT exit). The toast and banner appear as in test 2/3.
-result: blocked
-blocked_by: physical-device
-reason: "Requires Android device with installed PWA"
+result: skipped
+reason: "Deferred follow-up: 等同步到正式环境后再测试。当前测试环境不具备 Android PWA 独立模式条件。"
 
 ### 8. Selection-page system back exits the app (PWA required)
 expected: On the selection page after leaving playback via back control/close bar/system back, press Android system back → the app exits naturally (not intercepted).
   Also test: after pressing the Stop button (not back), press system back ONCE → app exits. A broken back hit here means the Stop path did not retire the marker.
-result: blocked
-blocked_by: physical-device
-reason: "Requires Android device with installed PWA"
+result: skipped
+reason: "Deferred follow-up: 等同步到正式环境后再测试。当前测试环境不具备 Android PWA 独立模式条件。"
 
 ### 9. Auto-end-convergence and positioning end (PWA required)
 expected: Select a VERY short subtitle file or start playback near a file's end; wait on the playback view for the subtitle to finish naturally → the app auto-converges to the selection page (no stuck black screen). Press system back ONCE → the app exits (marker retirements proved by auto-end path).
-result: blocked
-blocked_by: physical-device
-reason: "Requires Android device with installed PWA"
+result: skipped
+reason: "Deferred follow-up: 等同步到正式环境后再测试。当前测试环境不具备 Android PWA 独立模式条件。"
 
 ### 10. Resume at end-of-streamers edge
 expected: Use a short subtitle and let it finish naturally (either on a device or where the edge is simulated). After the auto-end convergence, the banner should not appear because the session is cleared. Re-enter with with same title → the subtitle engine picks any valid start fresh; no crash, no negative display.
@@ -66,8 +63,20 @@ total: 10
 passed: 7
 issues: 0
 pending: 0
-skipped: 0
-blocked: 3
+skipped: 3
+blocked: 0
+
+## Deferred Follow-Ups
+
+- test: 7
+  idea: "Android 系统返回到选择页（PWA 独立模式返回手势）"
+  deferred_at: 2026-08-01
+- test: 8
+  idea: "选择页系统返回退出应用 + Stop 路径标记清除"
+  deferred_at: 2026-08-01
+- test: 9
+  idea: "自动结束收敛 + 标记清除 + 系统返回退出"
+  deferred_at: 2026-08-01
 
 ## Gaps
 
