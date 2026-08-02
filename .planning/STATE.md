@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Session Resilience
-current_phase: 06
 status: completed
 stopped_at: Completed 06-03-PLAN.md (phase 06 ready for verification; device checkpoint carried to 06-UAT.md)
-last_updated: "2026-08-01T23:40:49.947Z"
+last_updated: "2026-08-02T00:31:00.602Z"
 last_activity: 2026-08-01
-last_activity_desc: Phase 06 complete
+last_activity_desc: Milestone v1.1 completed and archived
 progress:
   total_phases: 2
   completed_phases: 2
   total_plans: 7
   completed_plans: 7
   percent: 100
+current_phase: 06
 current_phase_name: Session Persistence & Resume
 ---
 
@@ -29,17 +29,15 @@ See: .planning/PROJECT.md (updated 2026-07-30)
 
 **Version:** v1.1 — Session Resilience
 **Goal:** 播放会话基于真实时间轴持久化——返回不误丢、杀进程可续播
-**Status:** All phases complete
+**Status:** v1.1 milestone complete
 **Started:** 2026-07-30
 
 ## Current Position
 
-Phase: 06
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-08-01 — Phase 06 complete
-
-Progress (v1.1): [██████████] 100%
+Phase: Milestone v1.1 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-08-01 — Milestone v1.1 completed and archived
 
 ## Performance Metrics
 
@@ -106,6 +104,8 @@ Items acknowledged and carried forward from v1.0 close (2026-07-29):
 | debug | subtitle-font-size | diagnosed (fixed in 03-04) |
 | todo | v1-pwa-subtitle-player.md | historical seed todo |
 
+Re-acknowledged at v1.1 milestone close (2026-08-01): 6 diagnosed debug sessions + 1 todo (playback-toolbar-layout.md, low) carried forward.
+
 ## Session Continuity
 
 Last session: 2026-08-01T22:33:54.109Z
@@ -116,3 +116,7 @@ Resume file: None
 
 *State initialized: 2026-07-26*
 *Last updated: 2026-07-30 — milestone v1.1 roadmap created*
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone
