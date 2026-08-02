@@ -502,3 +502,116 @@ body.high-contrast {
 .language-toggle:active {
   background: rgba(68, 68, 68, 0.9);
 }
+
+/* Session toast — passive "subtitle kept" notification (Phase 5, PLAY-08)
+   CSS pattern: .playback-controls fade idiom; z-index 300 slots between
+   .back-button/.language-toggle (200) and .rotate-overlay (9999) */
+.session-toast {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 90vw;
+  z-index: 300;
+  padding: 12px 20px;
+  background: rgba(17, 17, 17, 0.95);
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #e0e0e0;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: center;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.session-toast.hidden {
+  opacity: 0;
+}
+
+/* Session banner — persistent kept-session banner above .saved-movies
+   (Phase 5, PLAY-08, D-06/D-07). DOM order locked: [text][resume][dismiss]. */
+.session-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 6px;
+}
+
+.session-banner-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.session-banner-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #e0e0e0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.session-banner-meta {
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: #888;
+  margin-top: 4px;
+}
+
+/* Resume CTA — the phase's single highest-luminance interactive element */
+.session-banner-resume {
+  flex-shrink: 0;
+  height: 48px;
+  padding: 0 16px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #fff;
+  background: #222;
+  border: 1px solid #666;
+  border-radius: 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Dismiss × — destructive-idle, mirrors .saved-movie-delete:active exactly */
+.session-banner-dismiss {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 1.2rem;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.session-banner-dismiss:active {
+  background: #331111;
+  color: #fff;
+}
+
+/* Playback back control — low-visual-weight (D-09): transparent fill,
+   no border, dim idle state brightening only on :active */
+.playback-back {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: #888;
+  opacity: 0.55;
+  font-size: 0.85rem;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.playback-back:active {
+  opacity: 1;
+  color: #e0e0e0;
+}

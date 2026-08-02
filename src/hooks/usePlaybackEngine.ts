@@ -1,6 +1,15 @@
-import { useReducer, useRef, useEffect, useCallback } from 'react'
+import { useReducer, useRef, useEffect, useCallback, useState } from 'react'
 import type { Cue } from '../types/subtitle'
 import { PlaybackEngine } from '../playback/PlaybackEngine'
+import type { PlaybackSession } from '../playback/session'
+import {
+  createSession,
+  pauseSession,
+  resumeSession,
+  updateSessionOffset,
+  sessionElapsedMs,
+} from '../playback/session'
+import { saveSession, clearSessionRecord } from '../db/sessions'
 
 /**
  * Playback status — the three states of the playback state machine.
@@ -62,24 +71,76 @@ export function playbackReducer(state: PlaybackState, action: PlaybackAction): P
 }
 
 /**
+ * Identity of the movie a session belongs to (Phase 5, PLAY-08).
+ *
+ * Phase-6 fallback semantics: App supplies `subtitleId` from the saved-record
+ * id when a filename match exists in the saved list, otherwise the raw
+ * fileName itself — identity is ambiguous-but-stable on saved-list misses
+ * and duplicate filenames (best-effort string match; fine under the v1
+ * single-session model). Phase 6's resume card MUST treat a
+ * fileName-fallback subtitleId as a SOFT link, not a hard IndexedDB
+ * foreign key.
+ */
+export interface SessionIdentity {
+  subtitleId: string
+  fileName: string
+}
+
+/**
  * React hook wrapping PlaybackEngine.
  *
  * Uses useReducer for state that affects rendering (status, currentIndex, activeCue)
  * and useRef for mutable values that don't (rAF ID, startTime, cues).
  *
- * Returns { state, play, pause, stop }.
+ * Phase 5 (PLAY-08): the hook also owns an in-memory wall-clock
+ * PlaybackSession (05-01 module) across play/pause/stop transitions, and
+ * exposes resyncToSession for the banner-resume wall-clock re-anchor
+ * (PLAY-08 #4 screen-sleep robustness). Session math delegates to the pure,
+ * clock-free session module; every wall-clock value enters via Date.now()
+ * at the call site.
+ *
+ * Phase 6 (FILE-03): the hook also persists the session to IndexedDB on
+ * every identity change (create/pause/resume/offset/stop — never on engine
+ * ticks), guarded so a fresh mount issues no delete, and exposes
+ * restoreSession for the one-tap resume path.
+ *
+ * Returns { state, play, pause, stop, session, resyncToSession, restoreSession }.
  */
-export function usePlaybackEngine(cues: Cue[], offsetMs: number = 0): {
+export function usePlaybackEngine(
+  cues: Cue[],
+  offsetMs: number = 0,
+  identity: SessionIdentity | null = null
+): {
   state: PlaybackState
   play: () => void
   pause: () => void
   stop: () => void
+  session: PlaybackSession | null
+  resyncToSession: () => void
+  restoreSession: (cues: Cue[], persisted: PlaybackSession) => void
 } {
   const [state, dispatch] = useReducer(playbackReducer, INITIAL_STATE)
+  const [session, setSession] = useState<PlaybackSession | null>(null)
 
   // Mutable values that don't trigger re-renders
   const engineRef = useRef<PlaybackEngine | null>(null)
   const cuesRef = useRef<Cue[]>(cues)
+
+  // Live-value refs keeping the useCallback([]) discipline on play/pause/
+  // stop/resyncToSession while reading the freshest session/identity/status.
+  const identityRef = useRef<SessionIdentity | null>(identity)
+  const sessionRef = useRef<PlaybackSession | null>(session)
+  const statusRef = useRef<PlaybackStatus>(state.status)
+  const offsetMsRef = useRef<number>(offsetMs)
+
+  // Imperative readers: mirror session and status every render.
+  sessionRef.current = session
+  statusRef.current = state.status
+
+  // Keep identity ref in sync with the prop
+  useEffect(() => {
+    identityRef.current = identity
+  }, [identity])
 
   // Keep cues ref in sync with cues prop
   useEffect(() => {
@@ -87,16 +148,50 @@ export function usePlaybackEngine(cues: Cue[], offsetMs: number = 0): {
     engineRef.current?.setCues(cues)
   }, [cues])
 
-  // Wire offset from settings to engine (real-time updates without restart)
+  // Wire offset from settings to engine (real-time updates without restart);
+  // the same effect keeps any live session's offset snapshot in sync.
   useEffect(() => {
+    offsetMsRef.current = offsetMs
     engineRef.current?.setOffset(offsetMs)
+    setSession((prev) => (prev ? updateSessionOffset(prev, offsetMs) : prev))
   }, [offsetMs])
 
-  // Create engine instance once
+  // Whether THIS hook instance has persisted a record (Pitfall-11 guard).
+  const hasPersistedRef = useRef(false)
+
+  // Persist-on-change (Phase 6, FILE-03 #1/#4): every setSession site
+  // allocates a fresh object or null, so identity change === semantic
+  // transition (create/pause/resume/offset/stop). Engine position ticks
+  // never touch the session object → zero write amplification against
+  // battery/quota. The hasPersistedRef gate kills the delete-before-hydrate
+  // race (RESEARCH Pitfall 11): the mount-time null session performs NO
+  // delete, so a record awaiting App's boot loadSession() can never be
+  // wiped by this effect — even under StrictMode double-invocation (the
+  // flag flips only after an actual save by this instance).
   useEffect(() => {
-    engineRef.current = new PlaybackEngine(cuesRef.current, (index) => {
-      dispatch({ type: 'TICK', activeIndex: index, cues: cuesRef.current })
-    })
+    if (session !== null) {
+      hasPersistedRef.current = true
+      void saveSession(session)
+    } else if (hasPersistedRef.current) {
+      hasPersistedRef.current = false
+      void clearSessionRecord()
+    }
+  }, [session])
+
+  // Create engine instance once. The onEnded closure converges React state
+  // to idle and clears the session when the engine self-stops (natural
+  // exhaustion — the agent's discretion #4).
+  useEffect(() => {
+    engineRef.current = new PlaybackEngine(
+      cuesRef.current,
+      (index) => {
+        dispatch({ type: 'TICK', activeIndex: index, cues: cuesRef.current })
+      },
+      () => {
+        dispatch({ type: 'STOP' })
+        setSession(null)
+      }
+    )
 
     return () => {
       engineRef.current?.stop()
@@ -106,17 +201,70 @@ export function usePlaybackEngine(cues: Cue[], offsetMs: number = 0): {
   const play = useCallback(() => {
     dispatch({ type: 'PLAY' })
     engineRef.current?.play()
+    setSession((prev) =>
+      prev
+        ? resumeSession(prev, Date.now())
+        : identityRef.current
+          ? createSession({
+              subtitleId: identityRef.current.subtitleId,
+              fileName: identityRef.current.fileName,
+              offsetMs: offsetMsRef.current,
+              now: Date.now(),
+            })
+          : null
+    )
   }, [])
 
   const pause = useCallback(() => {
     dispatch({ type: 'PAUSE' })
     engineRef.current?.pause()
+    setSession((prev) => (prev ? pauseSession(prev, Date.now()) : prev))
   }, [])
 
   const stop = useCallback(() => {
     dispatch({ type: 'STOP' })
     engineRef.current?.stop()
+    setSession(null)
   }, [])
 
-  return { state, play, pause, stop }
+  /**
+   * Re-anchor the engine from the wall-clock session (PLAY-08 #4
+   * screen-sleep robustness): an Android suspend may freeze the engine's
+   * monotonic clock while Date.now() keeps advancing, so the banner-resume
+   * path calls this BEFORE play() to snap the engine onto the session's
+   * real-time position. No-op unless playing with a live session — paused
+   * resume re-anchors by construction inside play(); fresh starts have no
+   * session.
+   */
+  const resyncToSession = useCallback(() => {
+    if (statusRef.current !== 'playing' || sessionRef.current === null) return
+    engineRef.current?.seekTo(sessionElapsedMs(sessionRef.current, Date.now()))
+  }, [])
+
+  /**
+   * One-tap resume of a persisted session (Phase 6, FILE-03 #2): prime the
+   * engine with the restored cues BEFORE play (Pitfall 3 — setCues via prop
+   * effect would commit one render late and the first ticks would read
+   * stale/empty cues), then play, then seek to the offset-INCLUSIVE
+   * wall-clock position (seekTo contract). The ordering setCues → play() →
+   * seekTo is locked by the restore-ordering contract tests: play()
+   * re-derives startTime on a fresh engine, so a pre-play seek is
+   * discarded. Do NOT route through resyncToSession — its statusRef guard
+   * no-ops in this fresh-launch gesture batch (status is still 'idle'
+   * pre-dispatch). Paused persisted records resume from their frozen value
+   * via resumeSession's no-jump guarantee.
+   */
+  const restoreSession = useCallback((cues: Cue[], persisted: PlaybackSession) => {
+    const engine = engineRef.current
+    if (!engine) return
+    const now = Date.now()
+    const live = resumeSession(persisted, now) // unfreeze if paused (no-jump)
+    engine.setCues(cues) // imperative — BEFORE play() (Pitfall 3)
+    dispatch({ type: 'PLAY' })
+    engine.play()
+    engine.seekTo(sessionElapsedMs(live, now)) // offset-INCLUSIVE space (seekTo JSDoc)
+    setSession(live)
+  }, [])
+
+  return { state, play, pause, stop, session, resyncToSession, restoreSession }
 }

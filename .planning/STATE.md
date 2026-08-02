@@ -1,91 +1,98 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: Cinema Subtitle PWA
+milestone: v1.1
+milestone_name: Session Resilience
 status: completed
-last_updated: "2026-07-29T08:05:14.338Z"
-last_activity: 2026-07-29
-last_activity_desc: Milestone v1.0 completed and archived
+stopped_at: Completed 06-03-PLAN.md (phase 06 ready for verification; device checkpoint carried to 06-UAT.md)
+last_updated: "2026-08-02T00:31:00.602Z"
+last_activity: 2026-08-01
+last_activity_desc: Milestone v1.1 completed and archived
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 11
-  completed_plans: 11
+  total_phases: 2
+  completed_phases: 2
+  total_plans: 7
+  completed_plans: 7
   percent: 100
+current_phase: 06
+current_phase_name: Session Persistence & Resume
 ---
 
 # State: CinemaSyncSubs
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-25)
+See: .planning/PROJECT.md (updated 2026-07-30)
 **Core value:** 让非英语母语观众在影院看外语片时能跟上剧情
-**Current focus:** Phase 02 — playback-display
+**Current focus:** Phase 06 — Session Persistence & Resume
 
 ## Milestone
 
-**Version:** v1.0
-**Status:** v1.0 milestone complete
-**Started:** 2026-07-26
+**Version:** v1.1 — Session Resilience
+**Goal:** 播放会话基于真实时间轴持久化——返回不误丢、杀进程可续播
+**Status:** v1.1 milestone complete
+**Started:** 2026-07-30
 
-## Current Phase
+## Current Position
 
-Phase 1 of 4: SRT Foundation
+Phase: Milestone v1.1 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-08-01 — Milestone v1.1 completed and archived
 
-## Progress
+## Performance Metrics
 
-**Plans:** 2/7 (Phase 1 planned)
-**Phases:** 0/4
-**Progress:** 5%
+**v1.0 final:** 4 phases, 11 plans, 25 tasks — shipped 2026-07-29 (3-day cycle, 62 files, +9,427 LOC)
+**v1.1:** 2 phases, 7 plans complete
+**Per-Plan Metrics:**
 
-## Blockers
-
-(None)
-
-## Key Risks
-
-| Risk | Mitigation | Phase |
-|------|------------|-------|
-| iOS Wake Lock broken on older versions (<18.4) | Dual-strategy: native API + NoSleep.js hidden video fallback | Phase 3 |
-| SRT encoding corruption (GBK/BOM) | readAsArrayBuffer + explicit encoding detection + BOM stripping | Phase 1 |
-| Subtitle timing drift over 2 hours | performance.now() + rAF architecture, never setInterval | Phase 2 |
-| iOS 7-day cache eviction | IndexedDB primary + re-cache on launch | Phase 3 |
-| iOS ignores manifest orientation | CSS portrait-mode rotate overlay | Phase 3 |
-
-## Decisions Log
-
-| Decision | Rationale | Date |
-|----------|-----------|------|
-| Coarse granularity (4 phases) | Simple app scope, solo developer, minimal coordination overhead | 2026-07-26 |
-| Phase 3 bundles PWA + Wake Lock + Persistence | These features share the "cinema readiness" theme and depend on Phase 2 completion | 2026-07-26 |
-| Phase 4 for offset + high contrast | These are differentiators that need stable playback engine first | 2026-07-26 |
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 05 P01 | 2 min | 3 tasks | 2 files |
+| Phase 05 P02 | 2 min | 2 tasks | 2 files |
+| Phase 05 P03 | 2 min | 3 tasks | 5 files |
+| Phase 05 P04 | 42 min | 3 tasks | 10 files |
+| Phase 06 P01 | 3h 28m | 2 tasks | 7 files |
+| Phase 06 P02 | 3 min | 2 tasks | 2 files |
+| Phase 06 P03 | 3 min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
-### Architecture
+### Key Mechanism (v1.1 foundation)
 
-- 3-layer pipeline: Parser → Playback Engine → Render Pipeline
-- State Store as single source of truth
-- Dual persistence: IndexedDB (subtitle data) + Cache API (app shell)
-- Time-separation: performance.now() for timing, rAF for rendering only
+- Wall-clock playback session: subtitle ID + `startedAt` real timestamp + offset, persisted via idb/IndexedDB
+- Resume position = `now − startedAt + offset` — immune to in-app navigation, refresh, and app kill
+- Phase 5 builds the clock + navigation layer; Phase 6 layers durability, resume card, and expiry on top
 
-### Tech Stack
+### Decisions
 
-- Vite 8.1.5 + vite-plugin-pwa 1.3.0
-- Custom SRT parser (~50 lines, no subtitle.js — avoids Node.js stream deps)
-- chardet 2.2.0 (encoding detection) + native TextDecoder (decoding)
-- idb 8.0.3 (IndexedDB wrapper)
-- Native Screen Wake Lock API + NoSleep.js fallback
+Recent decisions affecting current work (full log: PROJECT.md Key Decisions):
 
-### Open Questions
+- 2026-07-30: FUTR-01 audio auto-sync stays deferred — no legal reference audio in theatrical window; session persistence covers the real pain point (notes/audio-sync-assessment.md)
+- 2026-07-30: v1.1 split into 2 phases — shared wall-clock mechanism delivered with PLAY-08 in Phase 5; IndexedDB durability + resume UX (FILE-03) layered in Phase 6
+- [Phase ?]: Session module reads no clock: every wall-clock value enters via explicit now parameter (deterministic under test, directly persistable by Phase 6)
+- [Phase 05-lossless-playback-navigation]: resumePlayingAria split from resumePlaying — one key cannot hold both Resume and Resume {fileName}; planner-documented deviation accepted, both keys present in en+zh — Type-lock arity of t() interpolation keys
+- [Phase 05-lossless-playback-navigation]: Adopted uncommitted partial work from interrupted prior executor run; verified against plan+UI-SPEC, split CSS by hunk into per-task atomic commits — Orchestrator-approved takeover; no content changes needed after review
+- [Phase ?]: 05-04 checkpoint user override: back control ‹ 返回 placement moved from UI-SPEC/D-09 first-child to AFTER the 全屏 fullscreen toggle (UI-SPEC historical doc intentionally left unchanged)
+- [Phase 06-session-persistence-resume]: SESSION_EXPIRY_MS locked at 6 * 3_600_000 (6h), anchored on startedAt with strictly-greater comparison — Covers any theatrical screening plus previews with margin; a rolling updatedAt anchor adds record complexity with zero behavioral change (writes occur only on transitions). Resolves the STATE.md expiry-threshold blocker.
+- [Phase 06-session-persistence-resume]: sessions.ts adopts swallow-warn never-throw policy, consciously splitting from subtitles.ts wrapped-rethrow convention — The playback path must never crash on persistence failure; subtitle management is user-initiated and surfaces errors. Swallow-warn is RESEARCH-locked and documented in module JSDoc.
+- [Phase 06-session-persistence-resume]: loadSession treats an empty session store as null without issuing any write or delete; only structurally-invalid records trigger the unawaited best-effort clear — The boot-time initial-mount empty state must stay mutation-free; clear-on-invalid is the only sanctioned auto-delete in the load path (06-03 boot-flow wiring contract).
+- [Phase ?]: restoreSession ordering locked as setCues → play() → seekTo(sessionElapsedMs(live, now)); paused records unfreeze via resumeSession before play (no-jump); does NOT route through resyncToSession (its statusRef guard no-ops in the fresh-launch gesture batch) — play() re-derives startTime on a fresh engine and would clobber a pre-play seek anchor — the seek-before-play ordering provably restarts at 0:00:00. Contract tests in playbackEngine.test.ts lock both orderings so a future reorder fails loudly.
+- [Phase ?]: Persist effect adopts PA-4's effect-driven deletion gated by hasPersistedRef, consciously deviating from RESEARCH Pattern 2's explicit deletes at stop()/onEnded sites — The hasPersistedRef flag kills the identical Pitfall-11 delete-before-hydrate race (mount fires no delete because the flag starts false) without cross-component ref wiring and without touching stop()/onEnded bodies; hook-local and StrictMode-idempotent.
+- [Phase ?]: ResumeCard is a SessionBanner SIBLING reusing .session-banner* markup verbatim (D-07) — zero new CSS/i18n keys; index.css banner rules unchanged (7), translations.ts untouched — PA-2 executed
+- [Phase ?]: Session expiry evaluated exactly once per app launch in the boot mount effect; tap-time re-check rejected (orphaned card converges via onEnded) — PA-7 executed; 06-03 Task 3 device checkpoint auto-approved under --chain and carried to 06-UAT.md as human_needed
 
-- ~~Encoding detection: TextDecoder heuristics vs iconv-lite~~ — RESOLVED: chardet + native TextDecoder (Phase 1)
-- idb vs Dexie.js: STACK.md recommends idb, ARCHITECTURE.md recommends Dexie.js — resolve in Phase 3 planning
-- NoSleep.js silent MP4 asset: needs generation — resolve in Phase 3 planning
+### Pending Todos
+
+See .planning/todos/ — none blocking v1.1
+
+### Blockers/Concerns
+
+- Phase 5 planning: Android PWA back-gesture interception needs a popstate/hash strategy decision
+- Phase 6 planning: session expiry threshold must be finalized (default ~6 hours)
 
 ## Deferred Items
 
-Items acknowledged and deferred at milestone close on 2026-07-29:
+Items acknowledged and carried forward from v1.0 close (2026-07-29):
 
 | Category | Item | Status |
 |----------|------|--------|
@@ -97,17 +104,18 @@ Items acknowledged and deferred at milestone close on 2026-07-29:
 | debug | subtitle-font-size | diagnosed (fixed in 03-04) |
 | todo | v1-pwa-subtitle-player.md | historical seed todo |
 
+Re-acknowledged at v1.1 milestone close (2026-08-01): 6 diagnosed debug sessions + 1 todo (playback-toolbar-layout.md, low) carried forward.
+
+## Session Continuity
+
+Last session: 2026-08-01T22:33:54.109Z
+Stopped at: Completed 06-03-PLAN.md (phase 06 ready for verification; device checkpoint carried to 06-UAT.md)
+Resume file: None
+
 ---
 
 *State initialized: 2026-07-26*
-*Last updated: 2026-07-29*
-
-## Current Position
-
-Phase: Milestone v1.0 complete
-Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-07-29 — Milestone v1.0 completed and archived
+*Last updated: 2026-07-30 — milestone v1.1 roadmap created*
 
 ## Operator Next Steps
 

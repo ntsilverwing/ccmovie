@@ -45,6 +45,14 @@ const translations = {
     // RegisterSW.tsx
     newVersion: 'New version available. Reload to update?',
     offlineReady: 'App ready for offline use',
+
+    // SessionBanner.tsx / SessionToast.tsx
+    resumePlaying: 'Resume',
+    resumePlayingAria: 'Resume {fileName}',
+    sessionKeptToast: 'Subtitle kept — resume anytime',
+    sessionElapsed: '{time} elapsed',
+    sessionPausedAt: 'Paused at {time}',
+    dismissSession: 'Abandon session',
   },
   zh: {
     // App.tsx
@@ -90,6 +98,14 @@ const translations = {
     // RegisterSW.tsx
     newVersion: '有新版本可用，是否重新加载？',
     offlineReady: '应用已准备好离线使用',
+
+    // SessionBanner.tsx / SessionToast.tsx
+    resumePlaying: '继续播放',
+    resumePlayingAria: '继续播放《{fileName}》',
+    sessionKeptToast: '原字幕已保留，可直接继续播放',
+    sessionElapsed: '已播 {time}',
+    sessionPausedAt: '已暂停 {time}',
+    dismissSession: '放弃本次播放',
   },
 } as const
 

@@ -25,9 +25,13 @@ export function useWakeLock() {
   // Must be called within a user gesture (click/touch handler)
   const enable = useCallback(async () => {
     try {
-      // enable() returns a Promise per runtime implementation; type def says void
+      // enable() returns a Promise per runtime implementation; type def says
+      // void. NoSleep swallows acquire failures internally (catch →
+      // console.error, enabled=false), so the awaited promise RESOLVES even
+      // when the lock was denied — sync from the library's real state, never
+      // from the await outcome.
       await (getNoSleep().enable() as unknown as Promise<void>)
-      setIsEnabled(true)
+      setIsEnabled(getNoSleep().enabled)
     } catch (err) {
       // Wake Lock failed — log but don't crash playback
       console.warn('Wake Lock enable failed:', err)
@@ -39,6 +43,15 @@ export function useWakeLock() {
     getNoSleep().disable()
     setIsEnabled(false)
   }, [getNoSleep])
+
+  // Re-sync React state from the library's true state WITHOUT touching the
+  // lock. Called on every playback-view entry so the indicator reflects
+  // reality: a system-initiated sentinel release, NoSleep's own fullscreen/
+  // visibilitychange re-acquire listener, or a late-settling first request
+  // can all leave the optimistic state stale.
+  const sync = useCallback(() => {
+    setIsEnabled(noSleepRef.current?.enabled ?? false)
+  }, [])
 
   // NOTE: Wake Lock re-acquisition on visibilitychange is intentionally NOT
   // implemented here. The native Wake Lock API requires a user gesture
@@ -54,5 +67,5 @@ export function useWakeLock() {
     }
   }, [])
 
-  return { enable, disable, isEnabled }
+  return { enable, disable, isEnabled, sync }
 }
