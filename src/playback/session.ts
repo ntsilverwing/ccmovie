@@ -99,6 +99,26 @@ export function updateSessionOffset(session: PlaybackSession, offsetMs: number):
 }
 
 /**
+ * Re-anchor session for seek in offset-inclusive position space (Phase 7, ENG-02).
+ *
+ * targetMs: offset-inclusive target position (same space as sessionElapsedMs).
+ * - If playing (pausedElapsedMs === null): re-anchor startedAt = now - (targetMs - offsetMs)
+ * - If paused (pausedElapsedMs !== null): update pausedElapsedMs = targetMs - offsetMs
+ */
+export function seekSession(session: PlaybackSession, targetMs: number, now: number): PlaybackSession {
+  if (session.pausedElapsedMs === null) {
+    return {
+      ...session,
+      startedAt: now - (targetMs - session.offsetMs),
+    }
+  }
+  return {
+    ...session,
+    pausedElapsedMs: targetMs - session.offsetMs,
+  }
+}
+
+/**
  * Age threshold beyond which a persisted session is treated as abandoned
  * (Phase 6, FILE-03 #3). Six hours covers any theatrical screening plus
  * previews with margin, while expiring yesterday's stale records.

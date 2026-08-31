@@ -134,21 +134,29 @@ export class PlaybackEngine {
   }
 
   /**
-   * Re-anchor the engine to an offset-INCLUSIVE elapsed position — the same
-   * position space the session banner displays (sessionElapsedMs).
+   * Seek to an offset-INCLUSIVE target position (targetMs) (Phase 7, ENG-01).
    *
-   * Android-suspend rationale: performance.now() is monotonic and may FREEZE
-   * across device sleep, while the session wall clock does not. seekTo snaps
-   * the engine back onto the wall-clock session before play() on the
-   * banner-resume path, so the resumed subtitle agrees with the banner.
-   *
-   * Safe on the playing path: only startTime and the cue hint are touched —
-   * no pause/stop, no rAF rescheduling; the next tick re-fires the active
-   * cue for the re-anchored position (lastIndex = -1).
+   * Playing state: re-anchors startTime and resets cue hint; playback continues seamlessly.
+   * Paused/idle state: updates pausedElapsed, resets cue hint, and immediately computes & fires onCueChange.
+   */
+  seek(targetMs: number): void {
+    if (this.isPlaying) {
+      this.startTime = performance.now() - (targetMs - this.offsetMs)
+      this.lastIndex = -1
+    } else {
+      this.pausedElapsed = targetMs - this.offsetMs
+      this.lastIndex = -1
+      const activeIndex = findActiveCue(this.cues, targetMs, -1)
+      this.lastIndex = activeIndex
+      this.onCueChange(activeIndex)
+    }
+  }
+
+  /**
+   * Re-anchor the engine to an offset-INCLUSIVE elapsed position — alias for seek().
    */
   seekTo(elapsedMs: number): void {
-    this.startTime = performance.now() - (elapsedMs - this.offsetMs)
-    this.lastIndex = -1
+    this.seek(elapsedMs)
   }
 
   /**

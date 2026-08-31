@@ -120,7 +120,10 @@ export function parseSRT(content: string): ParsedSubtitle {
     })
   }
 
-  // Step 10: Return structured result
+  // Step 10: Compute total duration from the last valid cue end time
+  const totalDurationMs = cues.length > 0 ? cues[cues.length - 1].end : 0
+
+  // Step 11: Return structured result
   return {
     cues,
     metadata: {
@@ -128,6 +131,7 @@ export function parseSRT(content: string): ParsedSubtitle {
       encoding: '',
       cueCount: cues.length,
       parsedAt: Date.now(),
+      totalDurationMs,
     },
     errors,
   }

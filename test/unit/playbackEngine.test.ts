@@ -197,20 +197,36 @@ describe('PlaybackEngine restore ordering contract (Phase 6, FILE-03)', () => {
     expect(onEnded).not.toHaveBeenCalled()
   })
 
-  it('contract lock: seek BEFORE play() is clobbered to position 0 on a fresh engine', () => {
-    // Documents WHY restoreSession seeks after play(): on a fresh engine
-    // play() re-derives startTime = performance.now() - pausedElapsed
-    // (pausedElapsed = 0), discarding any anchor a seek set earlier. This is
-    // a characterization lock, not desired end behavior — a future refactor
-    // that reorders restoreSession to seek-before-play flips the expectation
-    // and fails loudly here.
+  it('seek while paused immediately fires onCueChange and updates paused position without starting rAF', () => {
+    const seen: number[] = []
+    const onEnded = vi.fn()
+    const engine = new PlaybackEngine(CUES, (i) => seen.push(i), onEnded)
+
+    // Seek while paused/idle to cue 1 [1000, 2000)
+    engine.seek(1500)
+    expect(seen).toEqual([1])
+    expect(rafQueue.length).toBe(0) // rAF not started
+
+    // Seek while paused to gap [3000, 5000)
+    engine.seek(3500)
+    expect(seen[seen.length - 1]).toBe(-1)
+    expect(rafQueue.length).toBe(0)
+
+    // Play starts directly from seek position (3500)
+    engine.play()
+    advance(1600) // 3500 + 1600 = 5100 -> cue 3 [5000, 6000)
+    expect(seen[seen.length - 1]).toBe(3)
+  })
+
+  it('Phase 7 seek before play() sets paused position so subsequent play() resumes from seek target', () => {
     const seen: number[] = []
     const engine = new PlaybackEngine([], (i) => seen.push(i), vi.fn())
     engine.setCues(CUES)
-    engine.seekTo(1500) // the doomed order: anchor set before play()
-    engine.play() // play() overwrites startTime from pausedElapsed (= 0)
+    engine.seek(1500) // anchor set before play()
+    expect(seen).toEqual([1]) // immediately surfaces active cue
+    engine.play()
     runFrame()
-    expect(seen[seen.length - 1]).toBe(0) // ticks from position 0 — recorded 1500 lost
+    expect(seen[seen.length - 1]).toBe(1) // preserves target position
   })
 
   it('no spurious onEnded when a near-exhausted engine is stopped and restored', () => {

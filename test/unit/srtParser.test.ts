@@ -107,9 +107,18 @@ describe('parseSRT', () => {
     expect(result.cues[0].id).toBe(1)
   })
 
-  it('returns correct metadata', () => {
+  it('returns correct metadata including totalDurationMs', () => {
     const result = parseSRT(SAMPLE_SRT)
     expect(result.metadata.cueCount).toBe(3)
     expect(typeof result.metadata.parsedAt).toBe('number')
+    // SAMPLE_SRT last cue ends at 00:00:34,590 -> 34590ms
+    expect(result.metadata.totalDurationMs).toBe(34590)
+  })
+
+  it('sets totalDurationMs to 0 when no valid cues are found', () => {
+    const srt = '1\nnot a timecode\nHello'
+    const result = parseSRT(srt)
+    expect(result.cues).toHaveLength(0)
+    expect(result.metadata.totalDurationMs).toBe(0)
   })
 })

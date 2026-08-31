@@ -48,6 +48,8 @@ export interface ParsedSubtitle {
     cueCount: number
     /** timestamp of parse */
     parsedAt: number
+    /** total duration in milliseconds (end time of last valid cue) */
+    totalDurationMs: number
   }
   /** non-fatal parse warnings */
   errors: ParseError[]

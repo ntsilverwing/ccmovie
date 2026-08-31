@@ -4,6 +4,7 @@ import {
   pauseSession,
   resumeSession,
   updateSessionOffset,
+  seekSession,
   sessionElapsedMs,
   formatElapsedHMS,
   SESSION_EXPIRY_MS,
@@ -144,6 +145,39 @@ describe('session timing model', () => {
       expect(shifted).not.toBe(s)
       expect(shifted.offsetMs).toBe(8000)
       expect(s.offsetMs).toBe(5000)
+    })
+  })
+
+  describe('seekSession', () => {
+    it('re-anchors playing session so sessionElapsedMs equals targetMs immediately', () => {
+      const s = createSession({ ...BASE, offsetMs: 2000, now: T })
+      // Currently at T + 10_000: elapsed = 10_000 + 2000 = 12_000
+      const sought = seekSession(s, 45_000, T + 10_000)
+      expect(sought).not.toBe(s)
+      expect(sought.pausedElapsedMs).toBeNull()
+      expect(sessionElapsedMs(sought, T + 10_000)).toBe(45_000)
+      // Continues playing monotonically
+      expect(sessionElapsedMs(sought, T + 15_000)).toBe(50_000)
+    })
+
+    it('updates paused session so sessionElapsedMs equals targetMs without advancing', () => {
+      const s = createSession({ ...BASE, offsetMs: 3000, now: T })
+      const paused = pauseSession(s, T + 10_000) // pausedElapsedMs = 10_000, sessionElapsed = 13_000
+      const sought = seekSession(paused, 60_000, T + 20_000)
+      expect(sought).not.toBe(paused)
+      expect(sought.pausedElapsedMs).toBe(57_000) // targetMs (60000) - offsetMs (3000)
+      expect(sessionElapsedMs(sought, T + 20_000)).toBe(60_000)
+      // Frozen elapsed does not drift over time
+      expect(sessionElapsedMs(sought, T + 100_000)).toBe(60_000)
+    })
+
+    it('resuming a paused session after seek starts at targetMs smoothly', () => {
+      const s = createSession({ ...BASE, offsetMs: 0, now: T })
+      const paused = pauseSession(s, T + 10_000)
+      const sought = seekSession(paused, 120_000, T + 20_000)
+      const resumed = resumeSession(sought, T + 50_000)
+      expect(sessionElapsedMs(resumed, T + 50_000)).toBe(120_000)
+      expect(sessionElapsedMs(resumed, T + 55_000)).toBe(125_000)
     })
   })
 

@@ -7,6 +7,7 @@ import {
   pauseSession,
   resumeSession,
   updateSessionOffset,
+  seekSession,
   sessionElapsedMs,
 } from '../playback/session'
 import { saveSession, clearSessionRecord } from '../db/sessions'
@@ -115,6 +116,7 @@ export function usePlaybackEngine(
   play: () => void
   pause: () => void
   stop: () => void
+  seek: (targetMs: number) => void
   session: PlaybackSession | null
   resyncToSession: () => void
   restoreSession: (cues: Cue[], persisted: PlaybackSession) => void
@@ -228,6 +230,15 @@ export function usePlaybackEngine(
   }, [])
 
   /**
+   * Seek to an offset-INCLUSIVE target position (Phase 7, ENG-01, ENG-02).
+   * Updates engine state (immediate visual cue change if paused) and updates session.
+   */
+  const seek = useCallback((targetMs: number) => {
+    engineRef.current?.seek(targetMs)
+    setSession((prev) => (prev ? seekSession(prev, targetMs, Date.now()) : prev))
+  }, [])
+
+  /**
    * Re-anchor the engine from the wall-clock session (PLAY-08 #4
    * screen-sleep robustness): an Android suspend may freeze the engine's
    * monotonic clock while Date.now() keeps advancing, so the banner-resume
@@ -266,5 +277,5 @@ export function usePlaybackEngine(
     setSession(live)
   }, [])
 
-  return { state, play, pause, stop, session, resyncToSession, restoreSession }
+  return { state, play, pause, stop, seek, session, resyncToSession, restoreSession }
 }

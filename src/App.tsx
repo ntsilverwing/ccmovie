@@ -137,6 +137,7 @@ function App() {
 
   const handleSelectSaved = useCallback((stored: StoredSubtitle) => {
     // Reconstruct ParsedSubtitle from StoredSubtitle
+    const lastCue = stored.cues[stored.cues.length - 1]
     const result: ParsedSubtitle = {
       cues: stored.cues,
       metadata: {
@@ -144,6 +145,7 @@ function App() {
         encoding: stored.encoding,
         cueCount: stored.cueCount,
         parsedAt: stored.importedAt,
+        totalDurationMs: lastCue ? lastCue.end : 0,
       },
       errors: [],
     }
@@ -203,6 +205,7 @@ function App() {
         // Reconstruct ParsedSubtitle exactly as handleSelectSaved does —
         // WITHOUT routing through handleImport, whose stop() would tear
         // down the session being restored.
+        const lastCue = hit.cues[hit.cues.length - 1]
         const result: ParsedSubtitle = {
           cues: hit.cues,
           metadata: {
@@ -210,6 +213,7 @@ function App() {
             encoding: hit.encoding,
             cueCount: hit.cueCount,
             parsedAt: hit.importedAt,
+            totalDurationMs: lastCue ? lastCue.end : 0,
           },
           errors: [],
         }
