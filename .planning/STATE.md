@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Session Resilience
-status: completed
-stopped_at: Completed 06-03-PLAN.md (phase 06 ready for verification; device checkpoint carried to 06-UAT.md)
-last_updated: "2026-08-02T00:31:00.602Z"
-last_activity: 2026-08-01
-last_activity_desc: Milestone v1.1 completed and archived
+milestone: v1.2
+milestone_name: Playback UI Redesign & Timeline
+status: planning
+last_updated: "2026-08-31T06:09:48.007Z"
+last_activity: 2026-08-31
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 7
-  completed_plans: 7
-  percent: 100
-current_phase: 06
-current_phase_name: Session Persistence & Resume
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # State: CinemaSyncSubs
@@ -34,10 +30,10 @@ See: .planning/PROJECT.md (updated 2026-07-30)
 
 ## Current Position
 
-Phase: Milestone v1.1 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-08-01 — Milestone v1.1 completed and archived
+Status: Defining requirements
+Last activity: 2026-08-31 — Milestone v1.2 started
 
 ## Performance Metrics
 

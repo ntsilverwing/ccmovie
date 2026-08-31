@@ -8,17 +8,22 @@
 
 让非英语母语观众在影院看外语片时能跟上剧情——即使没有 CC 设备或 CC 只有英法字幕。
 
-## Current Milestone: v1.1 Session Resilience
+## Current Milestone: v1.2 Playback UI Redesign & Timeline
 
-**Goal:** 播放会话基于真实时间轴持久化——返回不误丢、杀进程可续播，彻底消除"手动重新对轴"的痛点。
+**Goal:** 重构播放控制区，引入全局 Timeline 进度条和手势操作，解决控制区功能堆叠、无法快速定位时间点的问题。
 
 **Target features:**
-- 播放页无损返回选择页，状态全保留（PLAY-08）
-- 会话持久化与断点续播，含续播卡片（FILE-03）
+- 播放控制区分层：主控制栏 + 设置面板（Drawer/Modal）
+- 屏幕手势操作：上滑跳下一句、下滑跳上一句
+- Timeline 进度条：支持拖拽定位，显示当前/总时长
+- PlaybackEngine 增强 `seek(targetMs)`：播放中/暂停中 Seek
+- Session 状态同步：Seek 后更新 PlaybackSession
+- 总时长获取：解析字幕时提取最后一条 end 时间
 
 **Key context:**
-- 两项需求共用同一机制：wall-clock 播放会话（字幕 ID + startedAt 时间戳 + 偏移）持久化到 IndexedDB
-- FUTR-01（音频自动对齐）经评估保持 deferred：上映窗口期无合法参照音频，且真痛点已被会话持久化覆盖
+- 基于 v1.1 wall-clock session 机制，Seek 后需同步更新 startedAt/offset
+- PlaybackControls.tsx 当前功能堆叠严重（10+ 按钮平铺）
+- 当前 seekTo 仅用于后台恢复对齐，不支持暂停态任意 Seek
 
 ## Requirements
 
@@ -35,11 +40,17 @@
 - ✓ 高对比度模式（黄色 #FFD700，WCAG AAA）— v1.0
 - ✓ 中英双语界面切换 — v1.0
 - ✓ 全屏影院模式（Fullscreen API）— v1.0
+- ✓ 播放页无损返回字幕选择页，状态全保留（PLAY-08）— v1.1
+- ✓ 播放会话跨刷新/杀进程持久化，重进可一键续播（FILE-03）— v1.1
 
 ### Active
 
-- [ ] 用户可从播放页无损返回字幕选择页，播放状态完整保留（PLAY-08）— v1.1
-- [ ] 播放会话跨刷新/杀进程持久化，重进可从正确位置一键续播（FILE-03）— v1.1
+- [ ] 播放控制区分层：主控制栏 + 设置面板（UI-01）— v1.2
+- [ ] 屏幕手势操作：上滑跳下一句、下滑跳上一句（UI-02）— v1.2
+- [ ] Timeline 进度条：拖拽定位 + 当前/总时长显示（UI-03）— v1.2
+- [ ] PlaybackEngine 增强 seek(targetMs)：播放中/暂停中 Seek（ENG-01）— v1.2
+- [ ] Seek 后 Session 状态同步：更新 startedAt/offset（ENG-02）— v1.2
+- [ ] 总时长获取：解析字幕时提取最后一条 end 时间（ENG-03）— v1.2
 
 ### Out of Scope
 
@@ -59,6 +70,9 @@
 - LCD 屏幕最低亮度约 2-5 nit，黑屏白字方案仍可用但漏光大于 OLED
 - 用户群体：在北美影院看外语片、需要中文字幕等非英法字幕的观众
 - **已发布 v1.0**：62 文件，+9,427 行代码，3 天开发周期
+- **已发布 v1.1**：2 phases, 7 plans, 18 tasks — wall-clock session 持久化 + 断点续播
+- PlaybackControls.tsx 当前承载 10+ 按钮平铺，暗场环境下操作困难
+- v1.1 的 wall-clock session 机制（startedAt + offset）为 v1.2 Seek 同步提供基础
 
 ## Tech Stack
 
@@ -108,4 +122,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-*Last updated: 2026-07-30 after v1.1 milestone start*
+*Last updated: 2026-08-31 after v1.2 milestone start*
