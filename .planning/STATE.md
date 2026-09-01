@@ -5,10 +5,10 @@ milestone_name: Playback UI Redesign & Timeline
 current_phase: 7
 current_phase_name: Engine Foundation
 status: complete
-stopped_at: Phase 7 executed and verified
-last_updated: "2026-08-31T11:32:00.000Z"
-last_activity: 2026-08-31
-last_activity_desc: Phase 7 executed and verified (2/2 plans complete)
+stopped_at: Phase 8 context gathered
+last_updated: "2026-09-01T06:03:03.713Z"
+last_activity: 2026-09-01
+last_activity_desc: Phase 8 context gathered
 progress:
   total_phases: 4
   completed_phases: 1
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-08-31)
 Phase: 7 of 10 (Engine Foundation) - Complete
 Plan: 2 of 2 in current phase
 Status: Phase complete
-Last activity: 2026-08-31 — Phase 7 completed (Engine Seek & Duration Metadata)
+Last activity: 2026-09-01 — Phase 8 context gathered
 
 Progress: [███░░░░░░░] 25%
 
@@ -39,7 +39,7 @@ Progress: [███░░░░░░░] 25%
 
 **Velocity:**
 
-- Total plans completed: 0 (v1.2)
+- Total plans completed: 2 (v1.2)
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -47,7 +47,8 @@ Progress: [███░░░░░░░] 25%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 07 | 2 | 2 | 8 min / 5 min |
+| 08 | 0 | - | - |
 
 **Recent Trend:**
 
@@ -84,6 +85,15 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-31T07:09:47.816Z
-Stopped at: Phase 7 context gathered
-Resume file: .planning/phases/07-engine-foundation/07-CONTEXT.md
+Last session: 2026-09-01T06:03:03.823Z
+Stopped at: Phase 8 context gathered
+Resume file: .planning/phases/08-timeline-progress-bar/08-CONTEXT.md
+
+## Rebuild Log
+
+- timestamp: 2026-09-01T06:01:08.051Z
+  kind: by-phase-table-reconciled
+  section: ## Performance Metrics
+  before: | Phase | Plans | Total | Avg/Plan | \n |-------|-------|-------|----------| \n | - | - | - | - |
+  after: | Phase | Plans | Total | Avg/Plan | \n |-------|-------|-------|----------| \n | 07 | 0 | - | - | \n | 08 | 0 | - | - |
+  reason: phase dirs on disk are canonical; rows for missing phases dropped, missing phases added
