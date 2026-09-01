@@ -51,62 +51,82 @@ Deferred to v2 (not in current roadmap):
 ## Phase Details
 
 ### Phase 7: Engine Foundation
+
 **Goal**: PlaybackEngine 支持精确定位控制与 Seek 后会话状态一致性
 **Depends on**: Nothing (v1.2 first phase)
 **Requirements**: ENG-01, ENG-02, ENG-03
 **Success Criteria** (what must be TRUE):
+
   1. User can seek to any position during playback and subtitles update seamlessly without interruption
   2. User can seek while paused and subtitles update immediately without pressing play
   3. After seeking, refreshing the page resumes from the exact seek position (not pre-seek position)
   4. Timeline displays correct total duration matching the last subtitle cue end time
+
 **Plans**: 2/2 plans completed
 
 Plans:
+
 - [x] 07-01: Engine Seek & Session Sync — completed 2026-08-31
 - [x] 07-02: Total Duration Metadata — completed 2026-08-31
 
 ### Phase 8: Timeline & Progress Bar
+
 **Goal**: 用户可可视化播放进度并通过拖拽时间线导航到任意位置
 **Depends on**: Phase 7
 **Requirements**: UI-01, UI-02, UI-03
 **Success Criteria** (what must be TRUE):
+
   1. User sees a progress bar with current time on left and total duration on right
   2. User can drag the timeline to any position and playback updates seamlessly in both playing and paused states
   3. Timeline shows cue density markers indicating subtitle activity along the progress bar
-**Plans**: TBD
+
+**Plans**: 2 plans
 
 Plans:
-- [ ] 08-01: TBD
-- [ ] 08-02: TBD
+**Wave 1**
+
+- [ ] 08-01: Timeline 纯函数与 previewSeek 基础 — 密度分桶/钳制/键盘步进（TDD）+ timelineLabel i18n
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 08-02: Timeline 组件与集成 — Timeline.tsx/.timeline* CSS/props 链 + 人工拖拽验证
 
 **UI hint**: yes
 
 ### Phase 9: Gesture Navigation
+
 **Goal**: 用户在暗场影院环境中可通过盲操触控手势导航字幕
 **Depends on**: Phase 7
 **Requirements**: UI-04, UI-05
 **Success Criteria** (what must be TRUE):
+
   1. User can swipe up on the screen to jump to the next subtitle cue
   2. User can swipe down to jump to the previous subtitle cue
   3. First-time users see a brief gesture hint overlay that can be dismissed and won't appear again
+
 **Plans**: TBD
 
 Plans:
+
 - [ ] 09-01: TBD
 
 **UI hint**: yes
 
 ### Phase 10: Control Layering & Settings Drawer
+
 **Goal**: 播放控制区功能分层，低频操作收纳进设置面板，主控制栏保持简洁
 **Depends on**: Phase 8, Phase 9
 **Requirements**: UI-06, UI-07, UI-08
 **Success Criteria** (what must be TRUE):
+
   1. Main control bar shows only Timeline + Play/Pause + Settings button
   2. User can open a settings drawer with offset, font size, contrast, dim mode, and fullscreen controls
   3. Controls auto-hide after 3 seconds of inactivity and reappear on screen tap
+
 **Plans**: TBD
 
 Plans:
+
 - [ ] 10-01: TBD
 
 **UI hint**: yes
