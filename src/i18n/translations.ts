@@ -56,6 +56,12 @@ const translations = {
 
     // Timeline.tsx
     timelineLabel: 'Playback progress',
+
+    // GestureGuide.tsx
+    gestureGuideTitle: 'Gesture Navigation',
+    gestureGuideSwipeUp: 'Swipe up: Next subtitle',
+    gestureGuideSwipeDown: 'Swipe down: Previous subtitle',
+    gestureGuideDismiss: 'Tap anywhere to dismiss',
   },
   zh: {
     // App.tsx
@@ -112,6 +118,12 @@ const translations = {
 
     // Timeline.tsx
     timelineLabel: '播放进度',
+
+    // GestureGuide.tsx
+    gestureGuideTitle: '暗场手势导航',
+    gestureGuideSwipeUp: '上滑：跳到下一句',
+    gestureGuideSwipeDown: '下滑：跳到上一句',
+    gestureGuideDismiss: '轻触任意处关闭',
   },
 } as const
 
