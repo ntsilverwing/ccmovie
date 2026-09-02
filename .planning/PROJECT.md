@@ -42,15 +42,20 @@
 - ✓ 全屏影院模式（Fullscreen API）— v1.0
 - ✓ 播放页无损返回字幕选择页，状态全保留（PLAY-08）— v1.1
 - ✓ 播放会话跨刷新/杀进程持久化，重进可一键续播（FILE-03）— v1.1
+- ✓ PlaybackEngine 增强 seek(targetMs)：播放中/暂停中 Seek（ENG-01）— Phase 7
+- ✓ Seek 后 Session 状态同步：更新 startedAt/offset（ENG-02）— Phase 7
+- ✓ 总时长获取：解析字幕时提取最后一条 end 时间（ENG-03）— Phase 7
+- ✓ Timeline 进度条：拖拽定位 + 当前/总时长显示（UI-03）— Phase 8
+- ✓ Timeline 拖拽 Seek：播放中/暂停中无缝 Seek 且一次持久化（UI-02）— Phase 8
+- ✓ Timeline Cue 密度标记：三档亮度 + 空档零 DOM（UI-01）— Phase 8
 
 ### Active
 
-- [ ] 播放控制区分层：主控制栏 + 设置面板（UI-01）— v1.2
-- [ ] 屏幕手势操作：上滑跳下一句、下滑跳上一句（UI-02）— v1.2
-- [ ] Timeline 进度条：拖拽定位 + 当前/总时长显示（UI-03）— v1.2
-- [ ] PlaybackEngine 增强 seek(targetMs)：播放中/暂停中 Seek（ENG-01）— v1.2
-- [ ] Seek 后 Session 状态同步：更新 startedAt/offset（ENG-02）— v1.2
-- [ ] 总时长获取：解析字幕时提取最后一条 end 时间（ENG-03）— v1.2
+- [ ] 播放控制区分层：主控制栏 + 设置面板（UI-06）— v1.2 Phase 10
+- [ ] 屏幕手势操作：上滑跳下一句、下滑跳上一句（UI-04）— v1.2 Phase 9
+- [ ] 手势提示 Overlay：首次引导可关闭（UI-05）— v1.2 Phase 9
+- [ ] 设置面板 Drawer：偏移/字号/对比度/暗场/全屏收纳（UI-07）— v1.2 Phase 10
+- [ ] 控制栏自动隐藏：3 秒无操作隐藏、点击唤出（UI-08）— v1.2 Phase 10
 
 ### Out of Scope
 
@@ -122,4 +127,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-*Last updated: 2026-08-31 after v1.2 milestone start*
+*Last updated: 2026-09-02 after Phase 8*

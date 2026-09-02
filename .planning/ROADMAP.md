@@ -31,7 +31,7 @@
 **Milestone Goal:** 重构播放控制区，引入全局 Timeline 进度条和手势操作，解决控制区功能堆叠、无法快速定位时间点的问题。
 
 - [x] **Phase 7: Engine Foundation** (2/2 plans) — completed 2026-08-31
-- [ ] **Phase 8: Timeline & Progress Bar** - 可视化播放进度与拖拽导航
+- [x] **Phase 8: Timeline & Progress Bar** - 可视化播放进度与拖拽导航 (completed 2026-09-01)
 - [ ] **Phase 9: Gesture Navigation** - 暗场影院环境下的触控手势字幕导航
 - [ ] **Phase 10: Control Layering & Settings Drawer** - 控制区分层与设置面板收纳
 
@@ -143,6 +143,6 @@ Phases execute in numeric order: 7 → 8 → 9 → 10
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 7. Engine Foundation | v1.2 | 2/2 | Completed | 2026-08-31 |
-| 8. Timeline & Progress Bar | v1.2 | 2/2 | In Progress|  |
+| 8. Timeline & Progress Bar | v1.2 | 2/2 | Complete    | 2026-09-01 |
 | 9. Gesture Navigation | v1.2 | 0/1 | Not started | - |
 | 10. Control Layering & Settings Drawer | v1.2 | 0/1 | Not started | - |
