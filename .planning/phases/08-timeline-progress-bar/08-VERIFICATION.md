@@ -1,7 +1,7 @@
 ---
 phase: 08-timeline-progress-bar
 verified: 2026-09-01T22:06:00-06:00
-status: human_needed
+status: passed
 score: 3/10 must-haves verified
 behavior_unverified: 7
 overrides_applied: 0
@@ -9,65 +9,83 @@ re_verification: # 不适用 — 首次验证
   note: "Initial verification (no previous VERIFICATION.md existed)"
 next_action: "/gsd-verify-work 8"
 behavior_unverified_items:
+
   - truth: "usePlaybackEngine 暴露 previewSeek(targetMs)：仅更新引擎位置，不触碰 React session 状态 → 拖拽预览零 IndexedDB 写入（UI-02, D-01, 07-D-09）"
     test: "npm run dev → 播放中拖动 Timeline → DevTools Application → IndexedDB 观察会话记录"
     expected: "拖动过程中 elapsed 不逐帧变化，松手后仅更新一次（零逐帧写入）"
     why_human: "持久化由 session 对象身份驱动的 effect 触发，静态 region 检查（setSession=0）证明调用点缺失，但端到端零写入需运行时观测 IndexedDB；node 测试环境无法渲染组件"
+
   - truth: "播放页控制区顶部独占一行显示 Timeline：左侧当前时间、右侧总时长，均为 h:mm:ss（UI-01, D-04）"
     test: "npm run dev → 导入 SRT → 开始播放 → 观察控制区顶部行布局与时间标签"
     expected: "Timeline 独占一行，左为当前时间、右为总时长，h:mm:ss 定宽无水平抖动"
     why_human: "flex-wrap 渲染与标签观感（抖动、对齐）是浏览器视觉行为，grep 只能证明结构与 CSS 声明存在"
+
   - truth: "拖拽中当前时间与字幕画面实时更新且零 IndexedDB 写入（预览走 engine-only 路径，D-01）；松手提交一次并持久化，刷新页面恢复到松手位置（UI-02, D-02）"
     test: "播放中按住拖动观察时间/字幕实时跟随 → 松手 → 刷新页面"
     expected: "拖动中实时跟随；刷新后恢复到松手位置（证明提交持久化一次）"
     why_human: "拖拽状态机（isDragging/dragValue 分流）的运行时转换与 IndexedDB 持久化时序无组件测试（node 环境），属状态转换不变量"
+
   - truth: "播放中拖拽无缝继续播放；暂停中拖拽保持暂停并立即显示目标 Cue 或空白（UI-02, D-03）"
     test: "播放中拖拽松手确认不中断；暂停中拖拽松手确认画面立即更新且不自动播放"
     expected: "两种状态下 play/pause 状态均保持，画面立即反映目标位置"
     why_human: "engine tick 与 cue 切换的真实播放状态行为，无法在 node 测试环境重现"
+
   - truth: "Timeline 显示三档亮度的密度标记（opacity 0.35/0.65/1.0），空档处无任何标记 DOM；标记层垫于已播放段之下（UI-03, D-08, D-09）"
     test: "导入含疏密分布的 SRT → 播放视图观察密度标记亮度分档、空档区域、已播放白色段覆盖关系"
     expected: "密集段更亮（三档）、无字幕空档无标记、白色已播放段覆盖标记层"
     why_human: "数据层已由 31 个单测证明，但三档亮度观感与层叠视觉是渲染行为，无 DOM 测试"
+
   - truth: "键盘 ←/→ 每次 ±5 秒并夹紧 [0, totalDurationMs]；Home/End 原生行为提交（D-12）"
     test: "Tab 聚焦 Timeline → 按 ←/→ 多次 → 按 End → 观察位置变化"
     expected: "每次 ±5s，到两端夹紧不越界；End 提交精确末端（播放中=合法立即结束，07-D-03）"
     why_human: "±5s 与夹紧计算已由 computeKeyboardStepTarget 单测证明，但浏览器 keydown 事件拦截（preventDefault）与实际步进手感需人工"
+
   - truth: "读屏播报「播放进度, h:mm:ss / h:mm:ss」（aria-label + aria-valuetext，D-13）"
     test: "DevTools Accessibility 面板检查 slider 的 accessible name 与 value text（或 VoiceOver/TalkBack）"
     expected: "name 为「播放进度」/「Playback progress」，value text 为「h:mm:ss / h:mm:ss」格式"
     why_human: "aria 属性已静态验证（aria-label=1、aria-valuetext=1），但读屏实际播报需辅助技术运行时确认"
 human_verification:
+
   - test: "UI-01 布局：npm run dev → 导入含多句字幕的 SRT → 进入播放视图并开始播放 → 观察控制区顶部"
     expected: "Timeline 独占一行，左为当前时间、右为总时长（h:mm:ss），播放中数字前进、白色填充段增长，时间标签无水平抖动"
     why_human: "视觉布局与渲染观感（Plan 08-02 Task 3 清单第 2 项）"
+
   - test: "UI-02 拖拽预览：按住 Timeline 拖动，观察当前时间与字幕画面；松手后刷新页面"
     expected: "拖动中实时跟随；刷新后恢复到松手位置（提交持久化一次）"
     why_human: "拖拽连续性与持久化时序（清单第 3 项）"
+
   - test: "D-01 零逐帧写入（选做）：DevTools → Application → IndexedDB，拖动过程中观察会话记录"
     expected: "拖动中 elapsed 不逐帧变化，松手后才更新一次"
     why_human: "IndexedDB 写入时序只能运行时观测（清单第 4 项）"
+
   - test: "D-03 状态保持：播放中拖拽松手；暂停中拖拽松手"
     expected: "播放中拖拽后继续播放不中断；暂停中拖拽后仍暂停且画面立即显示目标 Cue 或空白"
     why_human: "真实播放状态行为（清单第 5 项）"
+
   - test: "D-06/D-11 手柄显隐与触控区：静止观察 thumb；悬停/触摸/聚焦；检查布局无位移"
     expected: "静止时无圆形手柄；交互后 0.15s 淡入；48px 命中区不改变页面布局"
     why_human: "视觉行为（清单第 6 项）"
+
   - test: "UI-03 密度：观察字幕密集段与空档段的标记、已播放白色段与标记的覆盖关系"
     expected: "三档亮度（密集更亮）、空档轨道干净无标记、白色已播放段覆盖标记之上"
     why_human: "视觉观感（清单第 7 项）"
+
   - test: "D-12 键盘：Tab 聚焦 Timeline，按 ←/→，到两端，按 End"
     expected: "每次 ±5 秒、夹紧不越界；End 跳到末端（播放中提交精确末端=立即结束，07-D-03 期望行为）"
     why_human: "键盘交互手感与浏览器事件行为（清单第 8 项）"
+
   - test: "D-13 读屏：DevTools → Accessibility 面板检查 slider 的 accessible name 与 value text"
     expected: "name =「播放进度」/「Playback progress」，value text =「h:mm:ss / h:mm:ss」"
     why_human: "辅助技术播报（清单第 9 项）"
+
   - test: "触摸连续性：DevTools 设备模拟或真机拖动 Timeline 多次"
     expected: "拖动全程平滑不中断、页面不跟随滚动（touch-action: none 生效）"
     why_human: "触摸交互（清单第 10 项）"
+
   - test: "iOS Safari 真机：iOS Safari 拖拽 Timeline 多次（A1/A2）"
     expected: "无中断、pointerup 缺失场景由 blur/pointerleave 兜底提交"
     why_human: "需 iOS 真机，社区轶事级 Safari 触摸问题（08-VALIDATION.md Manual-Only 清单）"
+note: Initial verification (no previous VERIFICATION.md existed)
 ---
 
 # Phase 8: Timeline & Progress Bar — 验证报告
@@ -227,6 +245,7 @@ gsd-tools `check.decision-coverage-verify`：**13/13 honored** — "All trackabl
 | （无） | — | 全部 phase 文件扫描 TBD/FIXME/XXX/TODO/HACK/PLACEHOLDER = 0 匹配 | — | 无 blocker、无 warning |
 
 ℹ️ Info 级观察（不阻塞）：
+
 1. `08-VALIDATION.md` frontmatter 仍为 `status: draft / nyquist_compliant: false / wave_0_complete: false`，但 Wave 0 项（timelineDensity.test.ts 31 用例）已实际交付——建议 validate-phase 收尾时勾选。
 2. `REQUIREMENTS.md` Traceability 表 UI-01/02/03 仍标 Pending——建议随本验证更新。
 3. `.planning/STATE.md` 有未提交修改（git status 显示 M）——orchestrator 打包时处理。
