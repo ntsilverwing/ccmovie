@@ -80,16 +80,20 @@ Plans:
   2. User can drag the timeline to any position and playback updates seamlessly in both playing and paused states
   3. Timeline shows cue density markers indicating subtitle activity along the progress bar
 
-**Plans**: 2 plans
+**Plans**: 2/2 plans executed
 
 Plans:
+
+- [x] 08-01-PLAN.md
+- [x] 08-02-PLAN.md
+
 **Wave 1**
 
-- [ ] 08-01: Timeline 纯函数与 previewSeek 基础 — 密度分桶/钳制/键盘步进（TDD）+ timelineLabel i18n
+- [x] 08-01: Timeline 纯函数与 previewSeek 基础 — 密度分桶/钳制/键盘步进（TDD）+ timelineLabel i18n
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 08-02: Timeline 组件与集成 — Timeline.tsx/.timeline* CSS/props 链 + 人工拖拽验证
+- [x] 08-02: Timeline 组件与集成 — Timeline.tsx/.timeline* CSS/props 链 + 人工拖拽验证
 
 **UI hint**: yes
 
@@ -139,6 +143,6 @@ Phases execute in numeric order: 7 → 8 → 9 → 10
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 7. Engine Foundation | v1.2 | 2/2 | Completed | 2026-08-31 |
-| 8. Timeline & Progress Bar | v1.2 | 0/2 | Not started | - |
+| 8. Timeline & Progress Bar | v1.2 | 2/2 | In Progress|  |
 | 9. Gesture Navigation | v1.2 | 0/1 | Not started | - |
 | 10. Control Layering & Settings Drawer | v1.2 | 0/1 | Not started | - |
