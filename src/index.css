@@ -277,6 +277,184 @@ body.high-contrast {
   accent-color: #888;
 }
 
+/* Timeline — progress bar with cue density markers (Phase 8, UI-01/02/03).
+   Dark-theater low-brightness palette (D-04/D-05): static hardcoded colors —
+   NEVER bound to var(--subtitle-color) or body.dimmed/high-contrast tokens
+   (UI-SPEC static palette lock; a gold high-contrast progress bar would
+   violate D-05). No new z-index values: stacking lives inside the
+   .playback-controls (z-index 100) context — markers (z:0) < played fill
+   (track background) < transparent range input (D-08). */
+.timeline {
+  flex-basis: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Time labels — 0.85rem/400/1.2 monospace, min-width 7ch keeps h:mm:ss
+   fixed-width so playback causes zero horizontal jitter (UI-SPEC typography
+   contract). Current = accent white #e0e0e0, total = muted #888. */
+.timeline-time {
+  font-size: 0.85rem;
+  font-weight: 400;
+  line-height: 1.2;
+  font-family: monospace;
+  font-variant-numeric: tabular-nums;
+  min-width: 7ch;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.timeline-time-current {
+  color: #e0e0e0;
+  text-align: left;
+}
+
+.timeline-time-total {
+  color: #888;
+  text-align: right;
+}
+
+/* Track container — stacking context for markers under the range input */
+.timeline-track-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* Density marker layer — absolutely positioned BEHIND the range track
+   (D-08 z-order), pointer-transparent. Tier-0 buckets render no DOM (D-09),
+   so markers are individually positioned instead of flex placeholders. */
+.timeline-markers {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 6px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.timeline-marker {
+  position: absolute;
+  top: 0;
+  height: 6px;
+  background: #555;
+}
+
+.timeline-marker.tier-1 {
+  opacity: 0.35;
+}
+
+.timeline-marker.tier-2 {
+  opacity: 0.65;
+}
+
+.timeline-marker.tier-3 {
+  opacity: 1;
+}
+
+/* Range input — the ONLY interaction surface (D-10). appearance:none is
+   required (accent-color shortcut cannot layer the density markers).
+   Touch: touch-action:none prevents scroll hijacking mid-drag (A1);
+   tap highlight transparent aligns with existing buttons.
+   Hit area: content 16px + padding 32px = 48px vertical touch target,
+   negative margin cancels the padding so layout does not shift (D-11,
+   spacing md+2xl). */
+.timeline-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 16px;
+  padding: 16px 0;
+  margin: -16px 0;
+  background: transparent;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+
+/* WebKit track — 3px line, played segment painted via linear-gradient
+   stopping at --pos-percent (set inline by the component), rest #333 (D-05). */
+.timeline-slider::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    #e0e0e0 0%,
+    #e0e0e0 var(--pos-percent, 0%),
+    #333 var(--pos-percent, 0%),
+    #333 100%
+  );
+}
+
+/* Firefox — native progress pseudo-element paints the played segment. */
+.timeline-slider::-moz-range-track {
+  height: 3px;
+  border-radius: 2px;
+  background: #333;
+}
+
+.timeline-slider::-moz-range-progress {
+  height: 3px;
+  background: #e0e0e0;
+}
+
+/* Thumb — 14x14 circle, hidden at rest (D-06), fades in on hover/active/
+   focus/drag. WebKit needs margin-top -5.5px to center on the 3px track. */
+.timeline-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  border: none;
+  margin-top: -5.5px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.timeline-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  border: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.timeline-slider:hover::-webkit-slider-thumb,
+.timeline-slider:active::-webkit-slider-thumb,
+.timeline-slider:focus-visible::-webkit-slider-thumb,
+.timeline-slider.dragging::-webkit-slider-thumb {
+  opacity: 1;
+}
+
+.timeline-slider:hover::-moz-range-thumb,
+.timeline-slider:active::-moz-range-thumb,
+.timeline-slider:focus-visible::-moz-range-thumb,
+.timeline-slider.dragging::-moz-range-thumb {
+  opacity: 1;
+}
+
+/* Dragging class is the deterministic touch-drag supplement: some browsers
+   never set :active during touch drags, so the component toggles .dragging. */
+
+/* Keyboard focus — dim outline, xs offset (UI-SPEC: 1px solid #666, 4px) */
+.timeline-slider:focus-visible {
+  outline: 1px solid #666;
+  outline-offset: 4px;
+}
+
+/* Disabled (no valid duration, 07-D-07): native disabled semantics + visual */
+.timeline-slider:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 /* Offset display — shows current timing offset value */
 .offset-display {
   min-width: 48px;
