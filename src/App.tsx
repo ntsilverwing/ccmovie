@@ -49,7 +49,7 @@ function App() {
       }
     : null
 
-  const { state: playbackState, play, pause, stop, session, resyncToSession, restoreSession } = usePlaybackEngine(
+  const { state: playbackState, play, pause, stop, seek, previewSeek, session, resyncToSession, restoreSession } = usePlaybackEngine(
     subtitle?.cues ?? [],
     settings.offsetMs,
     activeIdentity
@@ -386,6 +386,11 @@ function App() {
           controlsVisible={controlsVisible}
           isFullscreen={isFullscreen}
           onToggleFullscreen={handleToggleFullscreen}
+          session={session}
+          cues={subtitle?.cues ?? []}
+          totalDurationMs={subtitle?.metadata.totalDurationMs ?? 0}
+          onSeek={seek}
+          onPreviewSeek={previewSeek}
         />
       </div>
     )
@@ -507,6 +512,11 @@ function App() {
           controlsVisible={controlsVisible}
           isFullscreen={isFullscreen}
           onToggleFullscreen={handleToggleFullscreen}
+          session={session}
+          cues={subtitle?.cues ?? []}
+          totalDurationMs={subtitle?.metadata.totalDurationMs ?? 0}
+          onSeek={seek}
+          onPreviewSeek={previewSeek}
         />
       )}
     </div>

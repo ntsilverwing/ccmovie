@@ -1,5 +1,8 @@
 import type { PlaybackStatus } from '../hooks/usePlaybackEngine'
+import type { PlaybackSession } from '../playback/session'
+import type { Cue } from '../types/subtitle'
 import { useLanguage } from '../i18n/LanguageContext'
+import { Timeline } from './Timeline'
 
 interface PlaybackControlsProps {
   status: PlaybackStatus
@@ -18,6 +21,13 @@ interface PlaybackControlsProps {
   isFullscreen: boolean
   onToggleFullscreen: () => void
   onBack?: () => void
+  // Timeline wiring (Phase 8, UI-01/UI-02/UI-03): session state + density
+  // data + dual-path seek (preview = engine-only, commit = engine+session).
+  session: PlaybackSession | null
+  cues: Cue[]
+  totalDurationMs: number
+  onSeek: (targetMs: number) => void
+  onPreviewSeek: (targetMs: number) => void
 }
 
 /**
@@ -43,6 +53,11 @@ export function PlaybackControls({
   isFullscreen,
   onToggleFullscreen,
   onBack,
+  session,
+  cues,
+  totalDurationMs,
+  onSeek,
+  onPreviewSeek,
 }: PlaybackControlsProps) {
   const { t } = useLanguage()
 
@@ -56,6 +71,14 @@ export function PlaybackControls({
 
       {(status === 'playing' || status === 'paused') && (
         <>
+          <Timeline
+            session={session}
+            status={status}
+            cues={cues}
+            totalDurationMs={totalDurationMs}
+            onSeek={onSeek}
+            onPreviewSeek={onPreviewSeek}
+          />
           <button className="control-button" onClick={() => onOffsetChange(offsetMs - 500)}>
             −0.5s
           </button>
