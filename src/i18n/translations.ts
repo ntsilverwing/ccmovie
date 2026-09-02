@@ -53,6 +53,9 @@ const translations = {
     sessionElapsed: '{time} elapsed',
     sessionPausedAt: 'Paused at {time}',
     dismissSession: 'Abandon session',
+
+    // Timeline.tsx
+    timelineLabel: 'Playback progress',
   },
   zh: {
     // App.tsx
@@ -106,6 +109,9 @@ const translations = {
     sessionElapsed: '已播 {time}',
     sessionPausedAt: '已暂停 {time}',
     dismissSession: '放弃本次播放',
+
+    // Timeline.tsx
+    timelineLabel: '播放进度',
   },
 } as const
 

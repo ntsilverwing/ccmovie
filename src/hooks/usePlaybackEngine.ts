@@ -105,7 +105,7 @@ export interface SessionIdentity {
  * ticks), guarded so a fresh mount issues no delete, and exposes
  * restoreSession for the one-tap resume path.
  *
- * Returns { state, play, pause, stop, session, resyncToSession, restoreSession }.
+ * Returns { state, play, pause, stop, seek, previewSeek, session, resyncToSession, restoreSession }.
  */
 export function usePlaybackEngine(
   cues: Cue[],
@@ -117,6 +117,7 @@ export function usePlaybackEngine(
   pause: () => void
   stop: () => void
   seek: (targetMs: number) => void
+  previewSeek: (targetMs: number) => void
   session: PlaybackSession | null
   resyncToSession: () => void
   restoreSession: (cues: Cue[], persisted: PlaybackSession) => void
@@ -239,6 +240,23 @@ export function usePlaybackEngine(
   }, [])
 
   /**
+   * Engine-only drag-preview seek (Phase 8, D-01, 07-D-09): updates the
+   * engine position so the subtitle frame tracks the drag in real time,
+   * but deliberately performs NO React state update — the persist effect
+   * is driven by session object identity (see L164-181), and an engine
+   * position change allocates no new session object, so the preview path
+   * writes ZERO IndexedDB records (no per-frame write amplification).
+   * Playing: the next engine tick captures the new cue; paused: the
+   * engine's seek() runs findActiveCue + onCueChange immediately. The
+   * preview target must already be clamped strictly before the exact end
+   * by the caller (Pitfall 2 — clampPreviewTarget, Phase 8 Plan 01);
+   * commit seeks go through seek() for one persistence write.
+   */
+  const previewSeek = useCallback((targetMs: number) => {
+    engineRef.current?.seek(targetMs)
+  }, [])
+
+  /**
    * Re-anchor the engine from the wall-clock session (PLAY-08 #4
    * screen-sleep robustness): an Android suspend may freeze the engine's
    * monotonic clock while Date.now() keeps advancing, so the banner-resume
@@ -277,5 +295,5 @@ export function usePlaybackEngine(
     setSession(live)
   }, [])
 
-  return { state, play, pause, stop, seek, session, resyncToSession, restoreSession }
+  return { state, play, pause, stop, seek, previewSeek, session, resyncToSession, restoreSession }
 }
