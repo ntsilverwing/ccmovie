@@ -18,7 +18,10 @@ import type { StoredSubtitle } from './db/database'
 import { getAllSubtitles, getSubtitle, deleteSubtitle } from './db/subtitles'
 import { loadSession, clearSessionRecord } from './db/sessions'
 import type { PlaybackSession } from './playback/session'
-import { SESSION_EXPIRY_MS, isSessionExpired } from './playback/session'
+import { SESSION_EXPIRY_MS, isSessionExpired, sessionElapsedMs } from './playback/session'
+import { useGestureNavigation } from './hooks/useGestureNavigation'
+import { findCueNavigationTarget } from './playback/cueNavigation'
+import { GestureGuide } from './components/GestureGuide'
 
 function App() {
   const [subtitle, setSubtitle] = useState<ParsedSubtitle | null>(null)
@@ -55,6 +58,30 @@ function App() {
     activeIdentity
   )
   const { enable: enableWakeLock, disable: disableWakeLock, sync: syncWakeLock } = useWakeLock()
+
+  const handleSwipeUp = useCallback(() => {
+    if (!subtitle) return
+    const currentMs = session ? sessionElapsedMs(session, Date.now()) : 0
+    const targetMs = findCueNavigationTarget(subtitle.cues, currentMs, 'up')
+    if (targetMs !== null) {
+      seek(targetMs)
+    }
+  }, [subtitle, session, seek])
+
+  const handleSwipeDown = useCallback(() => {
+    if (!subtitle) return
+    const currentMs = session ? sessionElapsedMs(session, Date.now()) : 0
+    const targetMs = findCueNavigationTarget(subtitle.cues, currentMs, 'down')
+    if (targetMs !== null) {
+      seek(targetMs)
+    }
+  }, [subtitle, session, seek])
+
+  const { containerProps: gestureContainerProps } = useGestureNavigation({
+    onSwipeUp: handleSwipeUp,
+    onSwipeDown: handleSwipeDown,
+    enabled: view === 'playback' && playbackState.status !== 'idle',
+  })
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>()
   const [controlsVisible, setControlsVisible] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(!!document.fullscreenElement)
@@ -368,7 +395,9 @@ function App() {
           fontSize={settings.fontSize}
           isDimmed={settings.isDimmed}
           isHighContrast={settings.isHighContrast}
+          containerProps={gestureContainerProps}
         />
+        <GestureGuide />
         <PlaybackControls
           status={playbackState.status}
           onPlay={handlePlay}

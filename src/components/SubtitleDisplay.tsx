@@ -6,6 +6,7 @@ interface SubtitleDisplayProps {
   fontSize: number
   isDimmed: boolean
   isHighContrast: boolean
+  containerProps?: React.HTMLAttributes<HTMLDivElement>
 }
 
 /**
@@ -15,7 +16,13 @@ interface SubtitleDisplayProps {
  * Font size and dim mode are driven by CSS custom properties for instant
  * visual updates without React re-renders.
  */
-export function SubtitleDisplay({ cue, fontSize, isDimmed, isHighContrast }: SubtitleDisplayProps) {
+export function SubtitleDisplay({
+  cue,
+  fontSize,
+  isDimmed,
+  isHighContrast,
+  containerProps,
+}: SubtitleDisplayProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Update font size via CSS custom property (no re-render needed for visual change)
@@ -36,7 +43,14 @@ export function SubtitleDisplay({ cue, fontSize, isDimmed, isHighContrast }: Sub
   }, [isHighContrast])
 
   return (
-    <div ref={containerRef} className="subtitle-container" role="status" aria-live="polite" aria-atomic="true">
+    <div
+      ref={containerRef}
+      className="subtitle-container"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      {...containerProps}
+    >
       <p className="subtitle-text">{cue?.text ?? ''}</p>
     </div>
   )

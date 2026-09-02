@@ -42,6 +42,7 @@ body.high-contrast {
   padding: 5vw;
   user-select: none;
   -webkit-user-select: none;
+  touch-action: none;
 }
 
 /* Subtitle text — cinema-optimized with CSS custom properties */
@@ -793,3 +794,64 @@ body.high-contrast {
   opacity: 1;
   color: #e0e0e0;
 }
+
+/* Gesture Guide overlay & card (Phase 9, UI-05, D-13, D-14) */
+.gesture-guide-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.gesture-guide-overlay.visible {
+  opacity: 1;
+}
+
+.gesture-guide-card {
+  background: rgba(26, 26, 26, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 16px 20px;
+  max-width: 280px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+
+.gesture-guide-title {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #e0e0e0;
+  margin-bottom: 12px;
+}
+
+.gesture-guide-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #cccccc;
+  margin: 8px 0;
+}
+
+.gesture-guide-icon {
+  color: #e0e0e0;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.gesture-guide-dismiss {
+  font-size: 0.8rem;
+  color: #888888;
+  margin-top: 12px;
+}
+
