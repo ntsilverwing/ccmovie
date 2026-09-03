@@ -33,7 +33,7 @@
 - [x] **Phase 7: Engine Foundation** (2/2 plans) — completed 2026-08-31
 - [x] **Phase 8: Timeline & Progress Bar** - 可视化播放进度与拖拽导航 (completed 2026-09-01)
 - [x] **Phase 9: Gesture Navigation** - 暗场影院环境下的触控手势字幕导航 (completed 2026-09-02, UAT 5/5 + 09A swipe de-clutter)
-- [ ] **Phase 10: Control Layering & Settings Drawer** - 控制区分层与设置面板收纳
+- [x] **Phase 10: Control Layering & Settings Drawer** - 控制区分层与设置面板收纳 (completed 2026-09-02)
 
 ## Backlog
 
@@ -136,11 +136,13 @@ Plans:
   2. User can open a settings drawer with offset, font size, contrast, dim mode, and fullscreen controls
   3. Controls auto-hide after 3 seconds of inactivity and reappear on screen tap
 
-**Plans**: TBD
+**Plans**: 1/1 plans executed
 
 Plans:
 
-- [ ] 10-01: TBD
+- [x] 10-01-PLAN.md
+
+- [x] 10-01: PlaybackControls refactor & Settings Drawer
 
 **UI hint**: yes
 
@@ -154,4 +156,4 @@ Phases execute in numeric order: 7 → 8 → 9 → 10
 | 7. Engine Foundation | v1.2 | 2/2 | Completed | 2026-08-31 |
 | 8. Timeline & Progress Bar | v1.2 | 2/2 | Complete    | 2026-09-01 |
 | 9. Gesture Navigation | v1.2 | 2/2 | Completed | 2026-09-02 |
-| 10. Control Layering & Settings Drawer | v1.2 | 0/1 | Not started | - |
+| 10. Control Layering & Settings Drawer | v1.2 | 1/1 | Complete    | 2026-09-02 |
