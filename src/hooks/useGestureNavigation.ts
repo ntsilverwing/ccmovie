@@ -5,6 +5,8 @@ export interface GestureNavigationOptions {
   onSwipeUp: () => void
   onSwipeDown: () => void
   enabled?: boolean
+  /** Called when a vertical swipe is in progress (dy dominant, >10px) — used to suppress controls auto-show */
+  onSwipeActiveChange?: (active: boolean) => void
 }
 
 export interface GestureContainerProps {
@@ -28,6 +30,7 @@ export function useGestureNavigation({
   onSwipeUp,
   onSwipeDown,
   enabled = true,
+  onSwipeActiveChange,
 }: GestureNavigationOptions): UseGestureNavigationReturn {
   const lastTriggeredRef = useRef<number>(0)
   const startCoordRef = useRef<{ x: number; y: number } | null>(null)
@@ -58,9 +61,17 @@ export function useGestureNavigation({
       if (!isPointerDownRef.current || activePointerIdRef.current !== e.pointerId) {
         return
       }
-      // Movement tracking is active; touch-action: none in CSS blocks scrolling
+      // Detect early vertical swipe to allow App to suppress controls auto-show
+      if (onSwipeActiveChange && startCoordRef.current) {
+        const dx = e.clientX - startCoordRef.current.x
+        const dy = e.clientY - startCoordRef.current.y
+        const isVerticalDominant = Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10
+        if (isVerticalDominant) {
+          onSwipeActiveChange(true)
+        }
+      }
     },
-    []
+    [onSwipeActiveChange]
   )
 
   const onPointerUp = useCallback(
@@ -91,21 +102,29 @@ export function useGestureNavigation({
         const now = Date.now()
         if (!isGestureThrottled(now, lastTriggeredRef.current)) {
           lastTriggeredRef.current = now
+          // Keep active flag for a short window to suppress the synthetic click
+          onSwipeActiveChange?.(true)
+          setTimeout(() => onSwipeActiveChange?.(false), 400)
           if (gesture === 'up') {
             onSwipeUp()
           } else {
             onSwipeDown()
           }
+        } else {
+          onSwipeActiveChange?.(false)
         }
+      } else {
+        onSwipeActiveChange?.(false)
       }
     },
-    [onSwipeUp, onSwipeDown]
+    [onSwipeUp, onSwipeDown, onSwipeActiveChange]
   )
 
   const onPointerCancel = useCallback((e: React.PointerEvent<HTMLElement>) => {
     isPointerDownRef.current = false
     activePointerIdRef.current = null
     startCoordRef.current = null
+    onSwipeActiveChange?.(false)
 
     try {
       if (e.currentTarget.hasPointerCapture(e.pointerId)) {
@@ -114,7 +133,7 @@ export function useGestureNavigation({
     } catch {
       // Ignore
     }
-  }, [])
+  }, [onSwipeActiveChange])
 
   return {
     containerProps: {

@@ -77,10 +77,16 @@ function App() {
     }
   }, [subtitle, session, seek])
 
+  // Phase 9A: suppress controls auto-show during vertical swipe (dark-field de-clutter)
+  const isSwipeActiveRef = useRef(false)
+
   const { containerProps: gestureContainerProps } = useGestureNavigation({
     onSwipeUp: handleSwipeUp,
     onSwipeDown: handleSwipeDown,
     enabled: view === 'playback' && playbackState.status !== 'idle',
+    onSwipeActiveChange: useCallback((active: boolean) => {
+      isSwipeActiveRef.current = active
+    }, []),
   })
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>()
   const [controlsVisible, setControlsVisible] = useState(true)
@@ -354,17 +360,26 @@ function App() {
     }
     setControlsVisible(true)
     const resetTimer = () => {
+      // Phase 9A: vertical swipe must not wake controls (tap/click is the wake signal)
+      if (isSwipeActiveRef.current) return
       setControlsVisible(true)
       clearTimeout(hideTimerRef.current)
       hideTimerRef.current = setTimeout(() => setControlsVisible(false), 3000)
     }
+    const handleActivity = () => {
+      if (isSwipeActiveRef.current) return
+      resetTimer()
+    }
     resetTimer()
-    window.addEventListener('pointermove', resetTimer)
-    window.addEventListener('touchstart', resetTimer)
+    window.addEventListener('pointermove', handleActivity)
+    window.addEventListener('touchstart', handleActivity)
+    // Click is the intentional wake signal — always wakes even if swipe flag is set (tap vs swipe distinction via pointerMove flag)
+    window.addEventListener('click', resetTimer)
     return () => {
       clearTimeout(hideTimerRef.current)
-      window.removeEventListener('pointermove', resetTimer)
-      window.removeEventListener('touchstart', resetTimer)
+      window.removeEventListener('pointermove', handleActivity)
+      window.removeEventListener('touchstart', handleActivity)
+      window.removeEventListener('click', resetTimer)
     }
   }, [playbackState.status, view])
 

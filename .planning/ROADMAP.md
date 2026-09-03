@@ -32,7 +32,7 @@
 
 - [x] **Phase 7: Engine Foundation** (2/2 plans) — completed 2026-08-31
 - [x] **Phase 8: Timeline & Progress Bar** - 可视化播放进度与拖拽导航 (completed 2026-09-01)
-- [ ] **Phase 9: Gesture Navigation** - 暗场影院环境下的触控手势字幕导航
+- [x] **Phase 9: Gesture Navigation** - 暗场影院环境下的触控手势字幕导航 (completed 2026-09-02, UAT 5/5 + 09A swipe de-clutter)
 - [ ] **Phase 10: Control Layering & Settings Drawer** - 控制区分层与设置面板收纳
 
 ## Backlog
@@ -108,11 +108,20 @@ Plans:
   2. User can swipe down to jump to the previous subtitle cue
   3. First-time users see a brief gesture hint overlay that can be dismissed and won't appear again
 
-**Plans**: TBD
+**Plans**: 2/2 plans executed
 
 Plans:
 
-- [ ] 09-01: TBD
+- [x] 09-01-PLAN.md
+- [x] 09-02-PLAN.md
+
+**Wave 1**
+
+- [x] 09-01: Cue Navigation 纯函数与 TDD — 向量判决/节流/逐句定位（TDD）+ 存储防御与 i18n
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [x] 09-02: 手势 Hook、引导组件与 App 集成 — useGestureNavigation + GestureGuide + SubtitleDisplay 绑定 + 人工触控验证
 
 **UI hint**: yes
 
@@ -144,5 +153,5 @@ Phases execute in numeric order: 7 → 8 → 9 → 10
 |-------|-----------|----------------|--------|-----------|
 | 7. Engine Foundation | v1.2 | 2/2 | Completed | 2026-08-31 |
 | 8. Timeline & Progress Bar | v1.2 | 2/2 | Complete    | 2026-09-01 |
-| 9. Gesture Navigation | v1.2 | 0/1 | Not started | - |
+| 9. Gesture Navigation | v1.2 | 2/2 | Completed | 2026-09-02 |
 | 10. Control Layering & Settings Drawer | v1.2 | 0/1 | Not started | - |

@@ -4,17 +4,17 @@ milestone: v1.2
 milestone_name: Playback UI Redesign & Timeline
 current_phase: 9
 current_phase_name: Gesture Navigation
-status: planning
-stopped_at: Phase 9 context gathered
-last_updated: "2026-09-02T05:59:18.551Z"
-last_activity: 2026-09-01
-last_activity_desc: Phase 8 complete, transitioned to Phase 9
+status: complete
+stopped_at: Phase 9 UAT 5/5 passed
+last_updated: "2026-09-02T13:42:00.000Z"
+last_activity: 2026-09-02
+last_activity_desc: Phase 9 UAT 5/5 passed + 09A swipe de-clutter fix
 progress:
   total_phases: 4
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
-  percent: 25
+  completed_phases: 3
+  total_plans: 6
+  completed_plans: 6
+  percent: 75
 ---
 
 # Project State
@@ -24,16 +24,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-31)
 
 **Core value:** 让非英语母语观众在影院看外语片时能跟上剧情
-**Current focus:** Phase 8 — Timeline & Progress Bar
+**Current focus:** Phase 9 — Gesture Navigation
 
 ## Current Position
 
 Phase: 9 — Gesture Navigation
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-01 — Phase 8 complete, transitioned to Phase 9
+Plan: All plans verified (2/2) + 09A fix
+Status: Complete (UAT 5/5 passed)
+Last activity: 2026-09-02 — Phase 9 UAT passed + swipe de-clutter
 
-Progress: [███░░░░░░░] 25%
+Progress: [██████░░░░] 75%
 
 ## Performance Metrics
 
@@ -85,7 +85,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-09-02T05:59:18.543Z
+Last session: 2026-09-03T04:18:31.532Z
 Stopped at: Phase 9 context gathered
 Resume file: .planning/phases/09-gesture-navigation/09-CONTEXT.md
 
