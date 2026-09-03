@@ -227,6 +227,210 @@ body.high-contrast {
   pointer-events: none;
 }
 
+/* Playback Top Bar (Phase 10, D-08) — fixed at top, synchronized auto-hide */
+.playback-top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  z-index: 150;
+  pointer-events: auto;
+  transition: opacity 0.3s ease;
+}
+
+.playback-top-bar.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.playback-top-bar-left,
+.playback-top-bar-right {
+  display: flex;
+  align-items: center;
+}
+
+/* Main controls row (Phase 10, UI-06) */
+.main-controls-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.main-controls-row .play-pause-button {
+  min-width: 96px;
+  min-height: 48px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.main-controls-row .settings-button {
+  min-width: 80px;
+  min-height: 48px;
+  font-size: 0.95rem;
+}
+
+.main-controls-row .settings-button.active {
+  background: #3a3a3a;
+  border-color: #666;
+}
+
+/* Settings Drawer / Bottom Sheet (Phase 10, UI-07, D-01) */
+.settings-drawer-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  pointer-events: auto;
+}
+
+.settings-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.settings-drawer {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background: rgba(12, 12, 12, 0.96);
+  border: 1px solid #333;
+  border-bottom: none;
+  border-radius: 16px 16px 0 0;
+  padding: 16px 20px 28px;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.8);
+  box-sizing: border-box;
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.settings-drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #222;
+  margin-bottom: 16px;
+}
+
+.settings-drawer-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ccc;
+  letter-spacing: 0.5px;
+}
+
+.settings-close-button {
+  width: 48px;
+  height: 48px;
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.settings-close-button:active {
+  background: #222;
+  color: #fff;
+}
+
+.settings-drawer-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-group-label {
+  font-size: 0.8rem;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.settings-group-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.font-size-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.font-size-display {
+  font-size: 0.95rem;
+  color: #bbb;
+  min-width: 48px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.stop-button {
+  background: #2b1717;
+  border-color: #552222;
+  color: #ff9999;
+}
+
+.stop-button:active {
+  background: #401f1f;
+}
+
+.reset-all-button {
+  background: #22222b;
+  border-color: #3b3b55;
+  color: #b0b8d8;
+}
+
+.reset-all-button:active {
+  background: #323242;
+}
+
 /* Fullscreen — pure black background, remove max-width constraint */
 :fullscreen {
   background: #000000;
@@ -242,10 +446,10 @@ body.high-contrast {
   padding: 0;
 }
 
-/* Control buttons — large touch targets for dark theater use */
+/* Control buttons — large touch targets for dark theater use (>= 48x48px) */
 .control-button {
-  min-width: 64px;
-  min-height: 44px;
+  min-width: 48px;
+  min-height: 48px;
   padding: 8px 12px;
   font-size: 0.85rem;
   background: #222;
@@ -253,6 +457,10 @@ body.high-contrast {
   border: 1px solid #444;
   border-radius: 8px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .control-button:active {

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { PlaybackStatus } from '../hooks/usePlaybackEngine'
 import type { PlaybackSession } from '../playback/session'
 import type { Cue } from '../types/subtitle'
@@ -10,31 +11,31 @@ interface PlaybackControlsProps {
   onPause: () => void
   onStop: () => void
   fontSize: number
-  isDimmed: boolean
   onFontSizeChange: (size: number) => void
-  onDimToggle: () => void
   offsetMs: number
-  isHighContrast: boolean
   onOffsetChange: (offsetMs: number) => void
-  onHighContrastToggle: () => void
+  onResetAll?: () => void
   controlsVisible: boolean
   isFullscreen: boolean
   onToggleFullscreen: () => void
-  onBack?: () => void
-  // Timeline wiring (Phase 8, UI-01/UI-02/UI-03): session state + density
-  // data + dual-path seek (preview = engine-only, commit = engine+session).
   session: PlaybackSession | null
   cues: Cue[]
   totalDurationMs: number
   onSeek: (targetMs: number) => void
   onPreviewSeek: (targetMs: number) => void
+  isSettingsOpen?: boolean
+  onToggleSettings?: () => void
+  onCloseSettings?: () => void
 }
 
 /**
- * Playback controls overlay — Start/Stop/Pause + font slider + dim toggle.
+ * Playback controls overlay with layered hierarchy (Phase 10, UI-06/UI-07).
+ * - Main bar: Timeline + Play/Pause/Start + Settings toggle button.
+ * - Settings drawer: Bottom Sheet for low-frequency actions (offset, discrete font size,
+ *   fullscreen, stop, global reset).
  *
- * Positioned fixed at bottom center. All buttons have large touch targets
- * for dark theater use (min 48x48px).
+ * Back button and Wake Lock status have been lifted to PlaybackTopBar (D-08).
+ * High Contrast and Dim toggles removed per cinema dark etiquette (D-04, D-05).
  */
 export function PlaybackControls({
   status,
@@ -42,99 +43,185 @@ export function PlaybackControls({
   onPause,
   onStop,
   fontSize,
-  isDimmed,
   onFontSizeChange,
-  onDimToggle,
   offsetMs,
-  isHighContrast,
   onOffsetChange,
-  onHighContrastToggle,
+  onResetAll,
   controlsVisible,
   isFullscreen,
   onToggleFullscreen,
-  onBack,
   session,
   cues,
   totalDurationMs,
   onSeek,
   onPreviewSeek,
+  isSettingsOpen: controlledSettingsOpen,
+  onToggleSettings,
+  onCloseSettings,
 }: PlaybackControlsProps) {
   const { t } = useLanguage()
+  const [internalOpen, setInternalOpen] = useState(false)
 
-  return (
-    <div className={`playback-controls${controlsVisible ? '' : ' hidden'}`}>
-      {status === 'idle' && (
+  const isSettingsOpen = controlledSettingsOpen !== undefined ? controlledSettingsOpen : internalOpen
+  const toggleSettings = onToggleSettings ?? (() => setInternalOpen((prev) => !prev))
+  const closeSettings = onCloseSettings ?? (() => setInternalOpen(false))
+
+  if (status === 'idle') {
+    return (
+      <div className={`playback-controls${controlsVisible ? '' : ' hidden'}`}>
         <button className="start-button" onClick={onPlay}>
           {t('start')}
         </button>
-      )}
+      </div>
+    )
+  }
 
-      {(status === 'playing' || status === 'paused') && (
-        <>
-          <Timeline
-            session={session}
-            status={status}
-            cues={cues}
-            totalDurationMs={totalDurationMs}
-            onSeek={onSeek}
-            onPreviewSeek={onPreviewSeek}
+  return (
+    <div className={`playback-controls${controlsVisible ? '' : ' hidden'}`}>
+      {/* 1. Timeline navigation bar (full width) */}
+      <Timeline
+        session={session}
+        status={status}
+        cues={cues}
+        totalDurationMs={totalDurationMs}
+        onSeek={onSeek}
+        onPreviewSeek={onPreviewSeek}
+      />
+
+      {/* 2. Main control row: Play/Pause and Settings button (UI-06) */}
+      <div className="main-controls-row">
+        <button
+          type="button"
+          className="control-button play-pause-button"
+          onClick={status === 'paused' ? onPlay : onPause}
+          aria-label={status === 'paused' ? t('resume') : t('pause')}
+        >
+          {status === 'paused' ? t('resume') : t('pause')}
+        </button>
+
+        <button
+          type="button"
+          className={`control-button settings-button${isSettingsOpen ? ' active' : ''}`}
+          onClick={toggleSettings}
+          aria-label={t('settings')}
+          aria-expanded={isSettingsOpen}
+        >
+          ⚙️ {t('settings')}
+        </button>
+      </div>
+
+      {/* 3. Settings Drawer / Bottom Sheet (UI-07, D-01) */}
+      {isSettingsOpen && (
+        <div className="settings-drawer-wrapper">
+          <div
+            className="settings-backdrop"
+            onClick={closeSettings}
+            aria-hidden="true"
           />
-          <button className="control-button" onClick={() => onOffsetChange(offsetMs - 500)}>
-            −0.5s
-          </button>
-          <span className="offset-display" aria-live="polite" aria-atomic="true">
-            {offsetMs > 0 ? '+' : ''}{(offsetMs / 1000).toFixed(1)}s
-          </span>
-          <button className="control-button" onClick={() => onOffsetChange(offsetMs + 500)}>
-            +0.5s
-          </button>
-          <button className="control-button" onClick={() => onOffsetChange(0)}>
-            {t('reset')}
-          </button>
-          <button className="control-button" onClick={onStop}>
-            {t('stop')}
-          </button>
-          <button className="control-button" onClick={status === 'paused' ? onPlay : onPause}>
-            {status === 'paused' ? t('resume') : t('pause')}
-          </button>
-          <div className="font-size-control">
-            <span className="font-size-label" aria-hidden="true">{t('fontSizeLabel')}</span>
-            <input
-              type="range"
-              min="36"
-              max="72"
-              value={fontSize}
-              onChange={(e) => onFontSizeChange(Number(e.target.value))}
-              className="font-size-slider"
-              aria-label={t('fontSizeLabel')}
-              aria-valuetext={`${fontSize} pixels`}
-            />
+          <div
+            className="settings-drawer"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t('settings')}
+          >
+            <div className="settings-drawer-header">
+              <span className="settings-drawer-title">{t('settings')}</span>
+              <button
+                type="button"
+                className="settings-close-button"
+                onClick={closeSettings}
+                aria-label={t('close')}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="settings-drawer-body">
+              {/* Subtitle offset group */}
+              <div className="settings-group">
+                <span className="settings-group-label">{t('offsetLabel')}</span>
+                <div className="settings-group-controls">
+                  <button
+                    type="button"
+                    className="control-button"
+                    onClick={() => onOffsetChange(offsetMs - 500)}
+                    aria-label="Decrease offset 0.5s"
+                  >
+                    −0.5s
+                  </button>
+                  <span className="offset-display" aria-live="polite" aria-atomic="true">
+                    {offsetMs > 0 ? '+' : ''}{(offsetMs / 1000).toFixed(1)}s
+                  </span>
+                  <button
+                    type="button"
+                    className="control-button"
+                    onClick={() => onOffsetChange(offsetMs + 500)}
+                    aria-label="Increase offset 0.5s"
+                  >
+                    +0.5s
+                  </button>
+                </div>
+              </div>
+
+              {/* Discrete font size group (D-06) */}
+              <div className="settings-group">
+                <span className="settings-group-label">{t('fontSize')}</span>
+                <div className="settings-group-controls font-size-controls">
+                  <button
+                    type="button"
+                    className="control-button"
+                    onClick={() => onFontSizeChange(Math.max(36, fontSize - 4))}
+                    disabled={fontSize <= 36}
+                    aria-label="Decrease font size"
+                  >
+                    {t('fontSmaller')}
+                  </button>
+                  <span className="font-size-display" aria-live="polite">
+                    {fontSize}px
+                  </span>
+                  <button
+                    type="button"
+                    className="control-button"
+                    onClick={() => onFontSizeChange(Math.min(72, fontSize + 4))}
+                    disabled={fontSize >= 72}
+                    aria-label="Increase font size"
+                  >
+                    {t('fontLarger')}
+                  </button>
+                </div>
+              </div>
+
+              {/* Utility buttons: Fullscreen, Stop, Global Reset (D-09) */}
+              <div className="settings-group actions-group">
+                <div className="settings-group-controls">
+                  <button
+                    type="button"
+                    className="control-button"
+                    onClick={onToggleFullscreen}
+                  >
+                    {isFullscreen ? t('exitFullscreen') : t('fullscreen')}
+                  </button>
+                  <button
+                    type="button"
+                    className="control-button stop-button"
+                    onClick={onStop}
+                  >
+                    {t('stop')}
+                  </button>
+                  {onResetAll && (
+                    <button
+                      type="button"
+                      className="control-button reset-all-button"
+                      onClick={onResetAll}
+                    >
+                      {t('resetAll')}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
-          <button className="control-button" onClick={onDimToggle}>
-            {isDimmed ? t('bright') : t('dim')}
-          </button>
-          <button className="control-button" onClick={onHighContrastToggle}>
-            {isHighContrast ? t('normal') : t('contrast')}
-          </button>
-          <button className="control-button" onClick={onToggleFullscreen}>
-            {isFullscreen ? t('exitFullscreen') : t('fullscreen')}
-          </button>
-          {(status === 'playing' || status === 'paused') && (
-            <span className="wake-lock-indicator" aria-live="polite">
-              {t('wakeLockOn')}
-            </span>
-          )}
-          {onBack && (
-            <button
-              className="playback-back"
-              type="button"
-              onClick={onBack}
-              aria-label={t('back')}
-            >
-              ‹ {t('back')}
-            </button>
-          )}
-        </>
+        </div>
       )}
     </div>
   )

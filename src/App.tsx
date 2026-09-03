@@ -3,6 +3,7 @@ import { FilePicker } from './components/FilePicker'
 import { CuePreview } from './components/CuePreview'
 import { SubtitleDisplay } from './components/SubtitleDisplay'
 import { PlaybackControls } from './components/PlaybackControls'
+import { PlaybackTopBar } from './components/PlaybackTopBar'
 import { SessionBanner } from './components/SessionBanner'
 import { ResumeCard } from './components/ResumeCard'
 import { SessionToast } from './components/SessionToast'
@@ -59,14 +60,27 @@ function App() {
   )
   const { enable: enableWakeLock, disable: disableWakeLock, sync: syncWakeLock } = useWakeLock()
 
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout>>()
+  const [controlsVisible, setControlsVisible] = useState(true)
+  const [isFullscreen, setIsFullscreen] = useState(!!document.fullscreenElement)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+
+  // D-11: temporarily flash controls/timeline when jumping cue via swipe
+  const flashControls = useCallback(() => {
+    setControlsVisible(true)
+    clearTimeout(hideTimerRef.current)
+    hideTimerRef.current = setTimeout(() => setControlsVisible(false), 2000)
+  }, [])
+
   const handleSwipeUp = useCallback(() => {
     if (!subtitle) return
     const currentMs = session ? sessionElapsedMs(session, Date.now()) : 0
     const targetMs = findCueNavigationTarget(subtitle.cues, currentMs, 'up')
     if (targetMs !== null) {
       seek(targetMs)
+      flashControls()
     }
-  }, [subtitle, session, seek])
+  }, [subtitle, session, seek, flashControls])
 
   const handleSwipeDown = useCallback(() => {
     if (!subtitle) return
@@ -74,8 +88,9 @@ function App() {
     const targetMs = findCueNavigationTarget(subtitle.cues, currentMs, 'down')
     if (targetMs !== null) {
       seek(targetMs)
+      flashControls()
     }
-  }, [subtitle, session, seek])
+  }, [subtitle, session, seek, flashControls])
 
   // Phase 9A: suppress controls auto-show during vertical swipe (dark-field de-clutter)
   const isSwipeActiveRef = useRef(false)
@@ -88,9 +103,6 @@ function App() {
       isSwipeActiveRef.current = active
     }, []),
   })
-  const hideTimerRef = useRef<ReturnType<typeof setTimeout>>()
-  const [controlsVisible, setControlsVisible] = useState(true)
-  const [isFullscreen, setIsFullscreen] = useState(!!document.fullscreenElement)
 
   useEffect(() => {
     const onFsChange = () => setIsFullscreen(!!document.fullscreenElement)
@@ -352,10 +364,17 @@ function App() {
   // I-8/discretion #3: view is in the deps so re-entering playback re-arms
   // the timer; selection views keep controls visible even while a session
   // plays in the background.
+  // D-03: When settings drawer is open, pause the 3s auto-hide countdown.
   useEffect(() => {
     // Only auto-hide during active playback (not paused) in playback view
     if (playbackState.status !== 'playing' || view !== 'playback') {
       setControlsVisible(true)
+      return
+    }
+    // D-03: When settings drawer is open, pause the 3-second auto-hide countdown
+    if (isSettingsOpen) {
+      setControlsVisible(true)
+      clearTimeout(hideTimerRef.current)
       return
     }
     setControlsVisible(true)
@@ -381,7 +400,14 @@ function App() {
       window.removeEventListener('touchstart', handleActivity)
       window.removeEventListener('click', resetTimer)
     }
-  }, [playbackState.status, view])
+  }, [playbackState.status, view, isSettingsOpen])
+
+  // Reset settings drawer when leaving playback or stopping
+  useEffect(() => {
+    if (view !== 'playback' || playbackState.status === 'idle') {
+      setIsSettingsOpen(false)
+    }
+  }, [view, playbackState.status])
 
   // Auto-end convergence (discretion #4): engine natural exhaustion fires
   // onEnded → status idle → converge the view to selection (no stuck black
@@ -405,6 +431,11 @@ function App() {
     return (
       <div className="app">
         <RotateOverlay />
+        <PlaybackTopBar
+          controlsVisible={controlsVisible}
+          onBack={handleBackControl}
+          isWakeLockActive={playbackState.status === 'playing' || playbackState.status === 'paused'}
+        />
         <SubtitleDisplay
           cue={playbackState.activeCue}
           fontSize={settings.fontSize}
@@ -418,15 +449,11 @@ function App() {
           onPlay={handlePlay}
           onPause={handlePause}
           onStop={handleStop}
-          onBack={handleBackControl}
           fontSize={settings.fontSize}
-          isDimmed={settings.isDimmed}
           onFontSizeChange={(size) => updateSettings({ fontSize: size })}
-          onDimToggle={() => updateSettings({ isDimmed: !settings.isDimmed, isHighContrast: false })}
           offsetMs={settings.offsetMs}
-          isHighContrast={settings.isHighContrast}
           onOffsetChange={(offsetMs) => updateSettings({ offsetMs })}
-          onHighContrastToggle={() => updateSettings({ isHighContrast: !settings.isHighContrast, isDimmed: false })}
+          onResetAll={() => updateSettings({ offsetMs: 0, fontSize: 48 })}
           controlsVisible={controlsVisible}
           isFullscreen={isFullscreen}
           onToggleFullscreen={handleToggleFullscreen}
@@ -435,6 +462,9 @@ function App() {
           totalDurationMs={subtitle?.metadata.totalDurationMs ?? 0}
           onSeek={seek}
           onPreviewSeek={previewSeek}
+          isSettingsOpen={isSettingsOpen}
+          onToggleSettings={() => setIsSettingsOpen((prev) => !prev)}
+          onCloseSettings={() => setIsSettingsOpen(false)}
         />
       </div>
     )
@@ -546,13 +576,9 @@ function App() {
           onPause={handlePause}
           onStop={handleStop}
           fontSize={settings.fontSize}
-          isDimmed={settings.isDimmed}
           onFontSizeChange={(size) => updateSettings({ fontSize: size })}
-          onDimToggle={() => updateSettings({ isDimmed: !settings.isDimmed, isHighContrast: false })}
           offsetMs={settings.offsetMs}
-          isHighContrast={settings.isHighContrast}
           onOffsetChange={(offsetMs) => updateSettings({ offsetMs })}
-          onHighContrastToggle={() => updateSettings({ isHighContrast: !settings.isHighContrast, isDimmed: false })}
           controlsVisible={controlsVisible}
           isFullscreen={isFullscreen}
           onToggleFullscreen={handleToggleFullscreen}

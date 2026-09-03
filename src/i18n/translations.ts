@@ -1,6 +1,6 @@
 export type Lang = 'en' | 'zh'
 
-const translations = {
+export const translations = {
   en: {
     // App.tsx
     continueWithSaved: 'Continue with saved movie',
@@ -10,9 +10,16 @@ const translations = {
     // PlaybackControls.tsx
     start: 'Start',
     reset: 'Reset',
+    resetAll: 'Reset All',
     stop: 'Stop',
     pause: 'Pause',
     resume: 'Resume',
+    settings: 'Settings',
+    close: 'Close',
+    offsetLabel: 'Offset',
+    fontSize: 'Font Size',
+    fontSmaller: 'A−',
+    fontLarger: 'A+',
     dim: 'Dim',
     bright: 'Bright',
     contrast: 'Contrast',
@@ -72,9 +79,16 @@ const translations = {
     // PlaybackControls.tsx
     start: '开始',
     reset: '重置',
+    resetAll: '全局重置',
     stop: '停止',
     pause: '暂停',
     resume: '继续',
+    settings: '设置',
+    close: '关闭',
+    offsetLabel: '偏移',
+    fontSize: '字号',
+    fontSmaller: 'A−',
+    fontLarger: 'A+',
     dim: '调暗',
     bright: '调亮',
     contrast: '高对比',
