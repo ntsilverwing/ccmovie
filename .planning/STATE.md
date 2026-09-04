@@ -25,7 +25,7 @@ current_phase_name: Control Layering & Settings Drawer
 See: .planning/PROJECT.md (updated 2026-09-04)
 
 **Core value:** 让非英语母语观众在影院看外语片时能跟上剧情
-**Current focus:** v1.2 complete — ready for /gsd-complete-milestone
+**Current focus:** Planning next milestone — run /gsd-new-milestone
 
 ## Current Position
 
@@ -64,10 +64,7 @@ Last activity: 2026-09-03 — Milestone v1.2 completed and archived
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- v1.2 roadmap: 4 phases (coarse granularity), engine-first dependency ordering
-- v1.2 research: Zero new dependencies, extend existing dual-source clock pattern
-- Phase 07 verification: Seek 双路径 + offset-inclusive 空间成立（UAT 7/7, VERIFICATION 4/4）；评审 2 Warning（idle 态 seek、NaN 入参）记为已知观察项，不阻塞
-- v1.2 milestone complete: 4/4 phases, 5/5 plans, UAT 全部通过（08: 9+3 deferred, 09: 5/5, 10: 5/5, 07: 7/7）
+- v1.2 archived 2026-09-03: full log in PROJECT.md; see RETROSPECTIVE.md for lessons
 
 ### Pending Todos
 
@@ -95,8 +92,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-09-04T04:40:00Z
-Stopped at: v1.2 milestone complete (4/4 phases) — ready for /gsd-complete-milestone
+Last session: 2026-09-04T05:43:49Z
+Stopped at: v1.2 archived to milestones/ — run /gsd-new-milestone for next
 Resume file: None
 
 ## Rebuild Log
