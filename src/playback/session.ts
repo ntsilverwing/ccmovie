@@ -104,8 +104,13 @@ export function updateSessionOffset(session: PlaybackSession, offsetMs: number):
  * targetMs: offset-inclusive target position (same space as sessionElapsedMs).
  * - If playing (pausedElapsedMs === null): re-anchor startedAt = now - (targetMs - offsetMs)
  * - If paused (pausedElapsedMs !== null): update pausedElapsedMs = targetMs - offsetMs
+ *
+ * WR-02 guard: non-finite targetMs/now returns an unchanged copy (pure and
+ * total — never throws, never produces NaN anchors that would violate the
+ * "Always a finite number" contract and get persisted to IndexedDB).
  */
 export function seekSession(session: PlaybackSession, targetMs: number, now: number): PlaybackSession {
+  if (!Number.isFinite(targetMs) || !Number.isFinite(now)) return { ...session }
   if (session.pausedElapsedMs === null) {
     return {
       ...session,

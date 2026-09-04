@@ -138,8 +138,14 @@ export class PlaybackEngine {
    *
    * Playing state: re-anchors startTime and resets cue hint; playback continues seamlessly.
    * Paused/idle state: updates pausedElapsed, resets cue hint, and immediately computes & fires onCueChange.
+   *
+   * WR-02 guards: non-finite targets are ignored (NaN would poison all
+   * future ticks and make findActiveCue return a wrong mid index);
+   * negatives are clamped to 0 (upper bound stays with the caller, Phase 08 Timeline).
    */
   seek(targetMs: number): void {
+    if (!Number.isFinite(targetMs)) return
+    targetMs = Math.max(0, targetMs)
     if (this.isPlaying) {
       this.startTime = performance.now() - (targetMs - this.offsetMs)
       this.lastIndex = -1
