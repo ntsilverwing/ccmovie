@@ -233,8 +233,18 @@ export function usePlaybackEngine(
   /**
    * Seek to an offset-INCLUSIVE target position (Phase 7, ENG-01, ENG-02).
    * Updates engine state (immediate visual cue change if paused) and updates session.
+   *
+   * WR-01 guard: no-op when there is no live session. Seeking the engine
+   * alone in idle/ready state would fork positions on the next play() —
+   * the engine resumes from the sought target while play() creates a fresh
+   * session starting at 0. Reads sessionRef (not the setSession updater)
+   * to keep the useCallback([]) discipline.
+   * WR-02 guard: ignore non-finite targets (NaN would poison engine timing
+   * and session anchors; the engine/session layers guard again defense-in-depth).
    */
   const seek = useCallback((targetMs: number) => {
+    if (!Number.isFinite(targetMs)) return
+    if (sessionRef.current === null) return
     engineRef.current?.seek(targetMs)
     setSession((prev) => (prev ? seekSession(prev, targetMs, Date.now()) : prev))
   }, [])
