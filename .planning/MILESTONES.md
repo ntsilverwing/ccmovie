@@ -1,5 +1,19 @@
 # Milestones
 
+## v1.2 Playback UI Redesign & Timeline (Shipped: 2026-09-03)
+
+**Phases completed:** 4 phases, 5 plans, 12 tasks
+
+**Key accomplishments:**
+
+- PlaybackEngine 与 session 新增 offset-inclusive Seek：播放态重锚定无缝继续，暂停态立即刷新字幕并同步 wall-clock 会话，刷新后续播落在 Seek 位置
+- SRT 解析在 metadata 中派生 totalDurationMs = lastCue.end（空文件为 0），并贯通 StoredSubtitle 重建路径供 Timeline 使用
+- `timelineDensity.ts` 纯函数模块（密度分桶 + 三档钳制 + 键盘步进，31 用例 TDD 全绿）、`previewSeek` engine-only 预览入口（零 IndexedDB 写入）、`timelineLabel` en/zh i18n 键
+
+**Known verification overrides:** 7 newly acknowledged, 0 carried forward from a prior close (see STATE.md Deferred Items). 另有 2 条历史归档延期项（brace-expansion advisory， archived v1.1/v1.2）因确认工具无法寻址已归档目录而未能标记抑制，原样保留、可正常审计。
+
+---
+
 ## v1.1 Session Resilience (Shipped: 2026-08-01)
 
 **Phases completed:** 2 phases, 7 plans, 18 tasks

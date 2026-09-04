@@ -48,14 +48,15 @@
 - ✓ Timeline 进度条：拖拽定位 + 当前/总时长显示（UI-03）— Phase 8
 - ✓ Timeline 拖拽 Seek：播放中/暂停中无缝 Seek 且一次持久化（UI-02）— Phase 8
 - ✓ Timeline Cue 密度标记：三档亮度 + 空档零 DOM（UI-01）— Phase 8
+- ✓ 屏幕手势操作：上滑跳下一句、下滑跳上一句（UI-04）— Phase 9
+- ✓ 手势提示 Overlay：首次引导可关闭（UI-05）— Phase 9
+- ✓ 播放控制区分层：主控制栏 + 设置面板（UI-06）— Phase 10
+- ✓ 设置面板 Drawer：偏移/字号/对比度/暗场/全屏收纳（UI-07）— Phase 10
+- ✓ 控制栏自动隐藏：3 秒无操作隐藏、点击唤出（UI-08）— Phase 10
 
 ### Active
 
-- [ ] 播放控制区分层：主控制栏 + 设置面板（UI-06）— v1.2 Phase 10
-- [ ] 屏幕手势操作：上滑跳下一句、下滑跳上一句（UI-04）— v1.2 Phase 9
-- [ ] 手势提示 Overlay：首次引导可关闭（UI-05）— v1.2 Phase 9
-- [ ] 设置面板 Drawer：偏移/字号/对比度/暗场/全屏收纳（UI-07）— v1.2 Phase 10
-- [ ] 控制栏自动隐藏：3 秒无操作隐藏、点击唤出（UI-08）— v1.2 Phase 10
+*(无 — v1.2 全部需求已验证)*
 
 ### Out of Scope
 
@@ -76,6 +77,7 @@
 - 用户群体：在北美影院看外语片、需要中文字幕等非英法字幕的观众
 - **已发布 v1.0**：62 文件，+9,427 行代码，3 天开发周期
 - **已发布 v1.1**：2 phases, 7 plans, 18 tasks — wall-clock session 持久化 + 断点续播
+- **已发布 v1.2**：4 phases（07–10），17 文件 +2,023/−98 行 — Timeline 拖拽导航 + 暗场手势 + 控制区分层/设置抽屉，172 单测全绿
 - PlaybackControls.tsx 当前承载 10+ 按钮平铺，暗场环境下操作困难
 - v1.1 的 wall-clock session 机制（startedAt + offset）为 v1.2 Seek 同步提供基础
 
@@ -107,6 +109,8 @@
 | Fullscreen API | 影院场景需隐藏状态栏 | ✅ 验证：自动全屏 + 手动切换 |
 | Wake Lock 双策略 | iOS 版本兼容性 | ✅ 验证：原生 + NoSleep.js |
 | FUTR-01 音频对齐保持 deferred | 上映窗口期无合法参照音频；会话持久化已覆盖真痛点 | — v1.1 评估结论 |
+| Seek 双路径 + offset-inclusive 空间 | 播放态重锚定无缝继续，暂停态立即刷新字幕；入参与显示统一含 offset | ✅ 验证：Phase 7 UAT 7/7 + VERIFICATION 4/4 |
+| totalDurationMs = 末 cue end | Timeline 右端即最后一条字幕 end，不扩展空白；零 cue 时为 0 | ✅ 验证：Phase 7 单元覆盖 + Timeline 正常显示 |
 
 ## Evolution
 
@@ -127,4 +131,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-*Last updated: 2026-09-02 after Phase 8*
+*Last updated: 2026-09-04 after v1.2 milestone*
